@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="nifi-sqllookup-services" />
+        <module name="nifi-sqllookup-services-api" />
+        <module name="nifi-sqllookup-services-api-nar" />
+        <module name="nifi-sqllookup-services-nar" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="nifi-sqllookup-services" target="1.8" />
+      <module name="nifi-sqllookup-services-api" target="1.8" />
+      <module name="nifi-sqllookup-services-api-nar" target="1.8" />
+      <module name="nifi-sqllookup-services-bundle" target="1.8" />
+      <module name="nifi-sqllookup-services-nar" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

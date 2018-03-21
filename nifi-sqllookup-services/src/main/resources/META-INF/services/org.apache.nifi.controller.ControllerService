@@ -1,0 +1,2 @@
+org.apache.nifi.sqllookup.SQLRecordLookupService
+org.apache.nifi.sqllookup.SQLLookupService
