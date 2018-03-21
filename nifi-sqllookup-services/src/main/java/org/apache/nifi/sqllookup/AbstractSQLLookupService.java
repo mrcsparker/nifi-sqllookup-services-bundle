@@ -1,6 +1,7 @@
 package org.apache.nifi.sqllookup;
 
 import com.github.benmanes.caffeine.cache.Cache;
+import org.apache.nifi.annotation.lifecycle.OnDisabled;
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.controller.AbstractControllerService;
 import org.apache.nifi.dbcp.DBCPService;
@@ -90,5 +91,15 @@ abstract class AbstractSQLLookupService<T> extends AbstractControllerService imp
     @Override
     public Set<String> getRequiredKeys() {
         return KEYS;
+    }
+
+    public long getCacheSize() {
+        return cache.estimatedSize();
+    }
+
+    @OnDisabled
+    public void onDisabled() {
+        cache.invalidateAll();
+        cache.cleanUp();
     }
 }

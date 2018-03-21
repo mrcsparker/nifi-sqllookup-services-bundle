@@ -17,7 +17,6 @@
 package org.apache.nifi.sqllookup;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
-import org.apache.nifi.annotation.lifecycle.OnDisabled;
 import org.apache.nifi.annotation.lifecycle.OnEnabled;
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.controller.ConfigurationContext;
@@ -123,10 +122,6 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
         return String.class;
     }
 
-    public long getCacheSize() {
-        return cache.estimatedSize();
-    }
-
     @OnEnabled
     public void onEnabled(final ConfigurationContext context) throws InitializationException {
         this.dbcpService = context.getProperty(CONNECTION_POOL).asControllerService(DBCPService.class);
@@ -136,12 +131,6 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
         this.lookupValue = context.getProperty(LOOKUP_VALUE_COLUMN).getValue();
 
         cache = Caffeine.newBuilder().maximumSize(cacheSize).build();
-    }
-
-    @OnDisabled
-    public void onDisabled() {
-        cache.invalidateAll();
-        cache.cleanUp();
     }
 
 }
