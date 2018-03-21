@@ -1,5 +1,7 @@
 # Apache NiFi SQL Lookup Service
 
+[![Build Status](https://travis-ci.org/mrcsparker/nifi-sqllookup-services-bundle.svg?branch=master)](https://travis-ci.org/mrcsparker/nifi-sqllookup-services-bundle)
+
 ## Usage
 
 * [Download Apache NIFI](https://nifi.apache.org/download.html)
