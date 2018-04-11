@@ -20,16 +20,21 @@ import org.apache.nifi.dbcp.DBCPService;
 import org.apache.nifi.util.TestRunners;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Collections.singleton;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TestSQLLookupService extends AbstractSQLLookupServiceTest {
+
+    static final Logger LOG = LoggerFactory.getLogger(TestSQLLookupService.class);
 
     private SQLLookupService sqlLookupService;
 
@@ -55,6 +60,16 @@ public class TestSQLLookupService extends AbstractSQLLookupServiceTest {
         runner.enableControllerService(sqlLookupService);
 
         setupDB();
+    }
+
+    @Test
+    public void testCorrectKeys() throws Exception {
+        assertEquals(sqlLookupService.getRequiredKeys(), singleton("key"));
+    }
+
+    @Test
+    public void testCorrectValueType() throws Exception {
+        assertEquals(sqlLookupService.getValueType(), String.class);
     }
 
     @Test
@@ -87,6 +102,12 @@ public class TestSQLLookupService extends AbstractSQLLookupServiceTest {
     @Test
     public void testInvalidLookup() throws Exception {
         final Optional<String> get1 = sqlLookupService.lookup(Collections.singletonMap("key", "notavalue"));
+        assertEquals(Optional.empty(), get1);
+    }
+
+    @Test
+    public void testNullLookup() throws Exception {
+        final Optional<String> get1 = sqlLookupService.lookup(Collections.singletonMap("key", "is-a-null"));
         assertEquals(Optional.empty(), get1);
     }
 

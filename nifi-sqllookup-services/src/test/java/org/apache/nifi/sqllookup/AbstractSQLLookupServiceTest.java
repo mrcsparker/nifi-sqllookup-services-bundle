@@ -167,6 +167,8 @@ public class AbstractSQLLookupServiceTest {
         stmt.execute("insert into TEST_LOOKUP_DB (name, value, period, address, price) VALUES ('108409967680509', 'A Darkling Plain', 8, '782 Durgan Rapids', 156.2)");
         stmt.execute("insert into TEST_LOOKUP_DB (name, value, period, address, price) VALUES ('458006613841984', 'The Glory and the Dream', 2, '84164 Gleason Branch', 300.34)");
         stmt.execute("insert into TEST_LOOKUP_DB (name, value, period, address, price) VALUES ('549572441434251', 'The Daffodil Sky', 2, '783 Bashirian Fork', 328.98)");
+        stmt.execute("insert into TEST_LOOKUP_DB (name, value, period, address, price) VALUES ('is-a-null', NULL, 2, NULL, 328.98)");
+
     }
 
     /**

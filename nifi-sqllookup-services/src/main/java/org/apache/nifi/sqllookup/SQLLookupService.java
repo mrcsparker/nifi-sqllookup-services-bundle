@@ -24,9 +24,12 @@ import org.apache.nifi.dbcp.DBCPService;
 import org.apache.nifi.lookup.LookupFailureException;
 import org.apache.nifi.processor.exception.ProcessException;
 import org.apache.nifi.processor.util.StandardValidators;
-import org.apache.nifi.reporting.InitializationException;
+import org.apache.nifi.serialization.SimpleRecordSchema;
 import org.apache.nifi.serialization.record.Record;
+import org.apache.nifi.serialization.record.RecordSchema;
+import org.apache.nifi.serialization.record.ResultSetRecordSet;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -78,22 +81,19 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
             preparedStatement.setQueryTimeout(queryTimeout);
             preparedStatement.execute();
 
-            ResultSet resultSet = preparedStatement.getResultSet();
+            final ResultSet resultSet = preparedStatement.getResultSet();
+            final RecordSchema schema = new SimpleRecordSchema(new ArrayList<>());
+            final ResultSetRecordSet resultSetRecordSet = new ResultSetRecordSet(resultSet, schema);
 
-            if (resultSet.next()) {
-                final SQLRecordSet SQLRecordSet = new SQLRecordSet(resultSet);
-                Optional<Record> lookupRecord = SQLRecordSet.getMapRecord();
-                if (lookupRecord.isPresent()) {
-                    return Optional.of(lookupRecord.get().getAsString(lookupValue));
-                }
-            }
+            Record record = resultSetRecordSet.next();
+            return Optional.of(record.getAsString(lookupValue));
 
         } catch (final ProcessException | SQLException e) {
             getLogger().error("Error during lookup: {}", new Object[] { key }, e);
             throw new LookupFailureException(e);
+        } catch (final NullPointerException | IOException e) {
+            return Optional.empty();
         }
-
-        return Optional.empty();
     }
 
     @Override
@@ -123,9 +123,9 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
     }
 
     @OnEnabled
-    public void onEnabled(final ConfigurationContext context) throws InitializationException {
+    public void onEnabled(final ConfigurationContext context) {
         this.dbcpService = context.getProperty(CONNECTION_POOL).asControllerService(DBCPService.class);
-        this.sqlQuery = context.getProperty(SQL_QUERY).getValue();
+        this.sqlQuery = context.getProperty(SQL_QUERY).evaluateAttributeExpressions().getValue();
         this.queryTimeout = context.getProperty(QUERY_TIMEOUT).asTimePeriod(TimeUnit.SECONDS).intValue();
         this.cacheSize = context.getProperty(CACHE_SIZE).asInteger();
         this.lookupValue = context.getProperty(LOOKUP_VALUE_COLUMN).getValue();

@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Collections.singleton;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -55,6 +56,22 @@ public class TestSQLRecordLookupService extends AbstractSQLLookupServiceTest {
         runner.enableControllerService(sqlRecordLookupService);
 
         setupDB();
+    }
+
+    @Test
+    public void testCorrectKeys() throws Exception {
+        assertEquals(sqlRecordLookupService.getRequiredKeys(), singleton("key"));
+    }
+
+    @Test
+    public void testCorrectValueType() throws Exception {
+        assertEquals(sqlRecordLookupService.getValueType(), Record.class);
+    }
+
+    @Test
+    public void testOnDisabled() throws Exception {
+        sqlRecordLookupService.onDisabled();
+        assertEquals(sqlRecordLookupService.cache.asMap().size(), 0);
     }
 
     @Test
@@ -99,5 +116,12 @@ public class TestSQLRecordLookupService extends AbstractSQLLookupServiceTest {
         assertEquals(9, get1.get().getAsInt("PERIOD").intValue());
         assertEquals("96098 Walter Mall", get1.get().getAsString("ADDRESS"));
         assertEquals(24.67, get1.get().getAsDouble("PRICE"), 1.0);
+    }
+
+    @Test
+    public void testNullLookup() throws Exception {
+        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("key", "is-a-null"));
+        assertTrue(get1.isPresent());
+        assertEquals(null, get1.get().getAsString("VALUE"));
     }
 }

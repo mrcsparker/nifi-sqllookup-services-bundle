@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class TestSQLLookupServiceWithCache extends AbstractSQLLookupServiceTest {
@@ -55,6 +56,12 @@ public class TestSQLLookupServiceWithCache extends AbstractSQLLookupServiceTest 
         runner.enableControllerService(sqlLookupService);
 
         setupDB();
+    }
+
+    @Test
+    public void testOnDisabled() throws Exception {
+        sqlLookupService.onDisabled();
+        assertEquals(sqlLookupService.cache.asMap().size(), 0);
     }
 
     @Test
@@ -108,11 +115,16 @@ public class TestSQLLookupServiceWithCache extends AbstractSQLLookupServiceTest 
 
         sqlLookupService.lookup(Collections.singletonMap("key", "990409804141864"));
         assertEquals(sqlLookupService.getCacheSize(), 10);
-
-        // SQLLookupService.lookup(Collections.singletonMap("key", "011340994294624"));
-        // assertEquals(SQLLookupService.getCacheSize(), 10);
-
-        // SQLLookupService.lookup(Collections.singletonMap("key", "986873446696583"));
-        // assertEquals(SQLLookupService.getCacheSize(), 10);
     }
+
+    @Test
+    public void testRecordLookupEmpty() throws Exception {
+        Optional<String> key = sqlLookupService.lookup(Collections.singletonMap("key", "is-a-null"));
+        assertFalse(key.isPresent());
+
+        key = sqlLookupService.lookup(Collections.singletonMap("key", "is-a-null"));
+        assertFalse(key.isPresent());
+    }
+
+
 }

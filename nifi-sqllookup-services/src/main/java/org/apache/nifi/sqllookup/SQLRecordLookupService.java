@@ -25,9 +25,12 @@ import org.apache.nifi.controller.ConfigurationContext;
 import org.apache.nifi.dbcp.DBCPService;
 import org.apache.nifi.lookup.LookupFailureException;
 import org.apache.nifi.processor.exception.ProcessException;
-import org.apache.nifi.reporting.InitializationException;
+import org.apache.nifi.serialization.SimpleRecordSchema;
 import org.apache.nifi.serialization.record.Record;
+import org.apache.nifi.serialization.record.RecordSchema;
+import org.apache.nifi.serialization.record.ResultSetRecordSet;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -77,19 +80,18 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
             preparedStatement.setQueryTimeout(queryTimeout);
             preparedStatement.execute();
 
-            ResultSet resultSet = preparedStatement.getResultSet();
+            final ResultSet resultSet = preparedStatement.getResultSet();
+            final RecordSchema schema = new SimpleRecordSchema(new ArrayList<>());
+            final ResultSetRecordSet resultSetRecordSet = new ResultSetRecordSet(resultSet, schema);
 
-            if (resultSet.next()) {
-                final SQLRecordSet SQLRecordSet = new SQLRecordSet(resultSet);
-                return SQLRecordSet.getMapRecord();
-            }
+            return Optional.of(resultSetRecordSet.next());
 
         } catch (final ProcessException | SQLException e) {
             getLogger().error("Error during lookup: {}", new Object[] { key }, e);
             throw new LookupFailureException(e);
+        } catch (final NullPointerException | IOException e) {
+            return Optional.empty();
         }
-
-        return Optional.empty();
     }
 
     @Override
@@ -112,9 +114,9 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
     }
 
     @OnEnabled
-    public void onEnabled(final ConfigurationContext context) throws InitializationException {
+    public void onEnabled(final ConfigurationContext context) {
         this.dbcpService = context.getProperty(CONNECTION_POOL).asControllerService(DBCPService.class);
-        this.sqlQuery = context.getProperty(SQL_QUERY).getValue();
+        this.sqlQuery = context.getProperty(SQL_QUERY).evaluateAttributeExpressions().getValue();
         this.queryTimeout = context.getProperty(QUERY_TIMEOUT).asTimePeriod(TimeUnit.SECONDS).intValue();
         this.cacheSize = context.getProperty(CACHE_SIZE).asInteger();
 
