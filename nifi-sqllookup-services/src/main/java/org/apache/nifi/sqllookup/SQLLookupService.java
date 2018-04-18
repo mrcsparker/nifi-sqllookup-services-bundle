@@ -24,6 +24,7 @@ import org.apache.nifi.dbcp.DBCPService;
 import org.apache.nifi.lookup.LookupFailureException;
 import org.apache.nifi.processor.exception.ProcessException;
 import org.apache.nifi.processor.util.StandardValidators;
+import org.apache.nifi.reporting.InitializationException;
 import org.apache.nifi.serialization.SimpleRecordSchema;
 import org.apache.nifi.serialization.record.Record;
 import org.apache.nifi.serialization.record.RecordSchema;
@@ -123,7 +124,7 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
     }
 
     @OnEnabled
-    public void onEnabled(final ConfigurationContext context) {
+    public void onEnabled(final ConfigurationContext context)  throws InitializationException {
         this.dbcpService = context.getProperty(CONNECTION_POOL).asControllerService(DBCPService.class);
         this.sqlQuery = context.getProperty(SQL_QUERY).evaluateAttributeExpressions().getValue();
         this.queryTimeout = context.getProperty(QUERY_TIMEOUT).asTimePeriod(TimeUnit.SECONDS).intValue();

@@ -21,7 +21,7 @@ abstract class AbstractSQLLookupService<T> extends AbstractControllerService imp
             new PropertyDescriptor.Builder()
                     .name("connection-pool")
                     .displayName("Connection Pool")
-                    .description("Specifices the JDBC connection pool used to connect to the database.")
+                    .description("Specifies the JDBC connection pool used to connect to the database.")
                     .identifiesControllerService(DBCPService.class)
                     .required(true)
                     .build();

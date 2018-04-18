@@ -28,8 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Collections.singleton;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class TestSQLRecordLookupService extends AbstractSQLLookupServiceTest {
 
@@ -122,6 +121,6 @@ public class TestSQLRecordLookupService extends AbstractSQLLookupServiceTest {
     public void testNullLookup() throws Exception {
         final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("key", "is-a-null"));
         assertTrue(get1.isPresent());
-        assertEquals(null, get1.get().getAsString("VALUE"));
+        assertNull(get1.get().getAsString("VALUE"));
     }
 }

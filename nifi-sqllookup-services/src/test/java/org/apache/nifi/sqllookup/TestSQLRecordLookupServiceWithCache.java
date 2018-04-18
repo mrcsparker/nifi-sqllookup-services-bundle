@@ -117,12 +117,6 @@ public class TestSQLRecordLookupServiceWithCache extends AbstractSQLLookupServic
 
         sqlRecordLookupService.lookup(Collections.singletonMap("key", "990409804141864"));
         assertEquals(sqlRecordLookupService.getCacheSize(), 10);
-
-        // SQLRecordLookupService.lookup(Collections.singletonMap("key", "011340994294624"));
-        // assertEquals(SQLRecordLookupService.getCacheSize(), 10);
-
-        // SQLRecordLookupService.lookup(Collections.singletonMap("key", "986873446696583"));
-        // assertEquals(SQLRecordLookupService.getCacheSize(), 10);
     }
 
 
