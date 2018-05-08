@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+
 ### Added
 - Bintray support
 - Changelog
@@ -8,8 +9,10 @@
 ### Changed
 - Cleaned up build documentation
 
-## [1.6.0-0] - 2018-05-18
+## [1.6.0-0] - 2018-05-08
+
 ### Added
+
 - Base for new documentation
 - Named parameter support
 - Accepts JSON as input (for named parameters)
@@ -20,6 +23,7 @@
 ### Removed
 - Removed SQLRecordSet. Using built-in NiFi Record support
 
-## [1.5.0-1]
+## [1.5.0-1] - 2018-03-21
+
 ### Added
 - Initial release

@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/mrcsparker/nifi-sqllookup-services-bundle.svg?branch=master)](https://travis-ci.org/mrcsparker/nifi-sqllookup-services-bundle)
 
+[![Download](https://api.bintray.com/packages/mrcsparker/maven/nifi-sqllookup-services-bundle/images/download.svg)](https://bintray.com/mrcsparker/maven/nifi-sqllookup-services-bundle/_latestVersion)
+
 **NiFI SQL Lookup Service** is a SQL-based lookup service. It allows you to enrich your flowfiles with any jdbc-compliant data store.
 
 It includes LookupRecord and LookupAttribute controllers.
