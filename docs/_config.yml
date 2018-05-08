@@ -17,10 +17,6 @@ title: NIFI SQL Lookup Services Bundle
 email: mrcsparker@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   Apache NIFI SQL Lookup Service
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: mrcsparker
-github_username:  mrcsparker
 show_downloads: true
 
 # Build settings
