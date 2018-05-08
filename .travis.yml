@@ -2,3 +2,13 @@ language: java
 jdk:
 - oraclejdk8
 script: mvn clean package
+deploy:
+  provider: releases
+  api_key:
+    secure: o4KJtC2DTodDChIO/gQNVK0uSj8M46o9Mxd/99jEs8K9eiHK20VZJDuCJVLXNyXXuhb3Jdn0coS2jX1Dk1sHQv9S2OSZpXanMHipqdEO9OGD/Zqt3dmuCBP+iYw9I3oqTp9cXcaZ/upc5ePnqS7BH/YpBDEHBL3lzwq/Y8iYB403lXGXCYLCX7e6q5EMaMNDYttrhClqwgRFEa5ENuyyjbN3yudk9jeThOAgS5lqcdNs4h4guc2tR1bxOWFyBzfE/vGucYEHAtSnkPUK+tYNS6wSE6L2fT51XX5Hhlq9kjCea9fsOxxVSoIRrqOPCnvoSH4R++VQUtpDjP1Gdra3luOlNXg4B2/uQH3g+2LuXj35sKrbkd1bxKBqyFssK30OfUa0uCkxkCC+a/UyBuN8FLaqCqMavxw/ieB848yMWSfQb8ihDLEV1aMLoiD8uKMWiViCfMwbWSUoog4+vw9nHVZrtQHIXiCzEKLVavW9MmCGTc932ROQvfJAFwwbuJZB9ffXbB6cjTAo1iI528IoIVJ2HoyBUh6cOE8/0F4VvKOmb0ZOHP2BcvAZ0xEuQLHDpr3XIcr4V/si6MrxsUYejCusefCYMgTMppOAWKnTz8lbdyJvRnlPw9US6EHItPbfWPR5AY7SZlhb9h+BsHLhdOHPDR4FuqYkwJeSY8qFZfc=
+  file_glob: true
+  file:
+    - nifi-sqllookup-services-api-nar/target/*.nar
+    - nifi-sqllookup-services-nar/target/*.nar
+  on:
+    repo: mrcsparker/nifi-sqllookup-services-bundle
