@@ -130,8 +130,6 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
 
         List<Map<String, Object>> mapList = jdbcTemplate.queryForList(sqlQuery, mapSqlParameterSource);
 
-        // LOG.info("{}", mapList);
-
         if (mapList.size() > 0) {
             Object o = mapList.get(0).get(lookupValue);
             if (o == null) {
