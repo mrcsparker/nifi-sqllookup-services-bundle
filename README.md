@@ -12,7 +12,7 @@
 > cd nifi-sqllookup-bundle
 > mvn package
 > cp ./nifi-sqllookup-services-nar/target/nifi-sqllookup-services-nar-1.5.0.nar /NIFI_INSTALL/lib/
-> cp ./nifi-sqllookup-services-nar/target/nifi-sqllookup-services-api-nar-1.5.0.nar /NIFI_INSTALL/lib/
+> cp ./nifi-sqllookup-services-api-nar/target/nifi-sqllookup-services-api-nar-1.5.0.nar /NIFI_INSTALL/lib/
 ```
 
 ![Sample data flow](images/flow.png)
