@@ -1,7 +1,7 @@
 {
   "package": {
     "name": "nifi-sqllookup-services-bundle",
-    "repo": "maven",
+    "repo": "generic",
     "subject": "mrcsparker",
     "desc": "NIFI controllers for SQL record and attributes lookups with built-in caching",
     "website_url": "https://github.com/mrcsparker/nifi-sqllookup-services-bundle",
@@ -19,7 +19,7 @@
     "name": "1.6.0",
     "desc": "v1.6.0",
     "released": "2018-05-08",
-    "vcs_tag": "1.6.0-1",
+    "vcs_tag": "1.6.0-3",
     "gpgSign": false,
     "attributes": [ {"name": "maturity", "values": ["Stable"], "type": "string"} ]
   },
