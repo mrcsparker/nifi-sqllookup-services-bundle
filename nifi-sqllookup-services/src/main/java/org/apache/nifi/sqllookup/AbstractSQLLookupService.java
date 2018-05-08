@@ -37,7 +37,7 @@ abstract class AbstractSQLLookupService<T> extends AbstractControllerService imp
                     .build();
 
     static final PropertyDescriptor QUERY_TIMEOUT = new PropertyDescriptor.Builder()
-            .name("Max Wait Time")
+            .name("max-wait-time")
             .description("The maximum amount of time allowed for a running SQL select query "
                     + " , zero means there is no limit. Max time less than 1 second will be equal to zero.")
             .defaultValue("0 seconds")
@@ -47,7 +47,7 @@ abstract class AbstractSQLLookupService<T> extends AbstractControllerService imp
             .build();
 
     static final PropertyDescriptor CACHE_SIZE = new PropertyDescriptor.Builder()
-            .name("Cache size")
+            .name("cache-size")
             .description("Size of the lookup cache.")
             .defaultValue("0")
             .required(true)
@@ -87,6 +87,11 @@ abstract class AbstractSQLLookupService<T> extends AbstractControllerService imp
     abstract Optional<T> databaseLookup(String key) throws LookupFailureException;
 
     abstract Optional<T> cacheLookup(String key) throws LookupFailureException;
+
+    protected boolean isJson(String value) {
+        if (value.isEmpty()) return false;
+        return value.trim().toCharArray()[0] == '{';
+    }
 
     @Override
     public Set<String> getRequiredKeys() {

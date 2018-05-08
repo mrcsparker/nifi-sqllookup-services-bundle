@@ -16,7 +16,10 @@
  */
 package org.apache.nifi.sqllookup;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.nifi.annotation.lifecycle.OnEnabled;
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.controller.ConfigurationContext;
@@ -29,19 +32,23 @@ import org.apache.nifi.serialization.SimpleRecordSchema;
 import org.apache.nifi.serialization.record.Record;
 import org.apache.nifi.serialization.record.RecordSchema;
 import org.apache.nifi.serialization.record.ResultSetRecordSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class SQLLookupService extends AbstractSQLLookupService<String> {
+
+    static final Logger LOG = LoggerFactory.getLogger(SQLLookupService.class);
 
     public static final PropertyDescriptor LOOKUP_VALUE_COLUMN =
             new PropertyDescriptor.Builder()
@@ -74,9 +81,15 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
 
     @Override
     Optional<String> databaseLookup(String key) throws LookupFailureException {
+        if (isJson(key)) {
+            return namedParamDatabaseLookup(key);
+        }
+        return paramDatabaseLookup(key);
+    }
 
+    Optional<String> paramDatabaseLookup(String key) throws LookupFailureException {
         try (final Connection connection = dbcpService.getConnection();
-             final PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+                final PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
 
             preparedStatement.setString(1, key);
             preparedStatement.setQueryTimeout(queryTimeout);
@@ -95,6 +108,46 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
         } catch (final NullPointerException | IOException e) {
             return Optional.empty();
         }
+    }
+
+    Optional<String> namedParamDatabaseLookup(String key) throws LookupFailureException {
+        final DataSource dataSource = new BasicDataSource() {
+            @Override
+            public Connection getConnection() throws SQLException {
+                return dbcpService.getConnection();
+            }
+        };
+
+        NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+
+        Map<String, Object> map;
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            map = mapper.readValue(key, new TypeReference<Map<String, Object>>(){});
+        } catch (IOException e) {
+            getLogger().error("Error during lookup: {}", new Object[] { key }, e);
+            return Optional.empty();
+        }
+
+        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
+        for (String col : map.keySet()) {
+            mapSqlParameterSource.addValue(col, map.get(col));
+        }
+
+        List<Map<String, Object>> mapList = jdbcTemplate.queryForList(sqlQuery, mapSqlParameterSource);
+
+        // LOG.info("{}", mapList);
+
+        if (mapList.size() > 0) {
+            Object o = mapList.get(0).get(lookupValue);
+            if (o == null) {
+                return Optional.empty();
+            } else {
+                return Optional.of(o.toString());
+            }
+        }
+
+        return Optional.empty();
     }
 
     @Override
