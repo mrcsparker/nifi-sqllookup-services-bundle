@@ -3,10 +3,12 @@
 ## [Unreleased]
 
 ### Added
+
 - Bintray support
 - Changelog
 
 ### Changed
+
 - Cleaned up build documentation
 
 ## [1.6.0-0] - 2018-05-08
