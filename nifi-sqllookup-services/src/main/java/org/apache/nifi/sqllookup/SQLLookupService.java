@@ -80,13 +80,6 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
     }
 
     @Override
-    Optional<String> databaseLookup(String key) throws LookupFailureException {
-        if (isJson(key)) {
-            return namedParamDatabaseLookup(key);
-        }
-        return paramDatabaseLookup(key);
-    }
-
     Optional<String> paramDatabaseLookup(String key) throws LookupFailureException {
         try (final Connection connection = dbcpService.getConnection();
                 final PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
@@ -110,6 +103,7 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
         }
     }
 
+    @Override
     Optional<String> namedParamDatabaseLookup(String key) throws LookupFailureException {
         final DataSource dataSource = new BasicDataSource() {
             @Override

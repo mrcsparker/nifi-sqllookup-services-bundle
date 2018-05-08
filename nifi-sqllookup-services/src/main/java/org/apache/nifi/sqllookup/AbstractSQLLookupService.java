@@ -84,7 +84,16 @@ abstract class AbstractSQLLookupService<T> extends AbstractControllerService imp
         return databaseLookup(key);
     }
 
-    abstract Optional<T> databaseLookup(String key) throws LookupFailureException;
+    public Optional<T> databaseLookup(String key) throws LookupFailureException {
+        if (isJson(key)) {
+            return namedParamDatabaseLookup(key);
+        }
+        return paramDatabaseLookup(key);
+    }
+
+    abstract Optional<T> paramDatabaseLookup(String key) throws LookupFailureException;
+
+    abstract Optional<T> namedParamDatabaseLookup(String key) throws LookupFailureException;
 
     abstract Optional<T> cacheLookup(String key) throws LookupFailureException;
 

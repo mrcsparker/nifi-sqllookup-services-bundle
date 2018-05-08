@@ -16,7 +16,10 @@
  */
 package org.apache.nifi.sqllookup;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.nifi.annotation.documentation.CapabilityDescription;
 import org.apache.nifi.annotation.documentation.Tags;
 import org.apache.nifi.annotation.lifecycle.OnEnabled;
@@ -29,7 +32,12 @@ import org.apache.nifi.serialization.SimpleRecordSchema;
 import org.apache.nifi.serialization.record.Record;
 import org.apache.nifi.serialization.record.RecordSchema;
 import org.apache.nifi.serialization.record.ResultSetRecordSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -44,6 +52,7 @@ import java.util.concurrent.TimeUnit;
 )
 public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
 
+    static final Logger LOG = LoggerFactory.getLogger(SQLRecordLookupService.class);
     private final List<PropertyDescriptor> propertyDescriptors;
 
     public SQLRecordLookupService() {
@@ -71,12 +80,60 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
     }
 
     @Override
-    Optional<Record> databaseLookup(String key) throws LookupFailureException {
+    Optional<Record> paramDatabaseLookup(String key) throws LookupFailureException {
 
         try (final Connection connection = dbcpService.getConnection();
              final PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
 
             preparedStatement.setString(1, key);
+            preparedStatement.setQueryTimeout(queryTimeout);
+            preparedStatement.execute();
+
+            final ResultSet resultSet = preparedStatement.getResultSet();
+            final RecordSchema schema = new SimpleRecordSchema(new ArrayList<>());
+            final ResultSetRecordSet resultSetRecordSet = new ResultSetRecordSet(resultSet, schema);
+
+            return Optional.of(resultSetRecordSet.next());
+
+        } catch (final ProcessException | SQLException e) {
+            getLogger().error("Error during lookup: {}", new Object[] { key }, e);
+            throw new LookupFailureException(e);
+        } catch (final NullPointerException | IOException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    Optional<Record> namedParamDatabaseLookup(String key) throws LookupFailureException {
+
+        final DataSource dataSource = new BasicDataSource() {
+            @Override
+            public Connection getConnection() throws SQLException {
+                return dbcpService.getConnection();
+            }
+        };
+
+        SQLNamedParameterJdbcTemplate jdbcTemplate = new SQLNamedParameterJdbcTemplate(dataSource);
+
+        Map<String, Object> map;
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            map = mapper.readValue(key, new TypeReference<Map<String, Object>>(){});
+        } catch (IOException e) {
+            getLogger().error("Error during lookup: {}", new Object[] { key }, e);
+            return Optional.empty();
+        }
+
+        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
+        for (String col : map.keySet()) {
+            mapSqlParameterSource.addValue(col, map.get(col));
+        }
+
+        PreparedStatementCreator preparedStatementCreator = jdbcTemplate.getPreparedStatement(sqlQuery, mapSqlParameterSource);
+
+        try (final Connection connection = dbcpService.getConnection();
+             final PreparedStatement preparedStatement = preparedStatementCreator.createPreparedStatement(connection)) {
+
             preparedStatement.setQueryTimeout(queryTimeout);
             preparedStatement.execute();
 

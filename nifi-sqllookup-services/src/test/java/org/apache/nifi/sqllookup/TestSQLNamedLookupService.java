@@ -16,7 +16,7 @@ import static java.util.Collections.singleton;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class TestSQLNamedLoopupService extends AbstractSQLLookupServiceTest {
+public class TestSQLNamedLookupService extends AbstractSQLLookupServiceTest {
 
     static final Logger LOG = LoggerFactory.getLogger(TestSQLLookupService.class);
 
