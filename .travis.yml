@@ -10,5 +10,7 @@ deploy:
   file:
     - nifi-sqllookup-services-api-nar/target/*.nar
     - nifi-sqllookup-services-nar/target/*.nar
+  skip_cleanup: true
   on:
     repo: mrcsparker/nifi-sqllookup-services-bundle
+    tags: true

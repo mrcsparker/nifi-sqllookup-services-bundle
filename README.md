@@ -18,7 +18,7 @@ These controllers were designed to be flexible and fast. They support:
 
 ## Simple Setup
 
-* [Download Apache NiFo](https://nifi.apache.org/download.html)
+* [Download Apache NiFi](https://nifi.apache.org/download.html)
 
 * Compile and install `nifi-sqllookup-bundle`
 
@@ -34,6 +34,10 @@ These controllers were designed to be flexible and fast. They support:
 ## Full Documentation
 
 [https://mrcsparker.github.io/nifi-sqllookup-services-bundle](https://mrcsparker.github.io/nifi-sqllookup-services-bundle)
+
+## Latest release
+
+[https://github.com/mrcsparker/nifi-sqllookup-services-bundle/releases/latest](https://github.com/mrcsparker/nifi-sqllookup-services-bundle/releases/latest)
 
 ## Articles on using NiFi lookup services
 
