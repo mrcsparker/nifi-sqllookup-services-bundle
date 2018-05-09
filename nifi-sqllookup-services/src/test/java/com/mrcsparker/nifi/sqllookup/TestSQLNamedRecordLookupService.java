@@ -1,4 +1,4 @@
-package org.apache.nifi.sqllookup;
+package com.mrcsparker.nifi.sqllookup;
 
 import org.apache.nifi.dbcp.DBCPService;
 import org.apache.nifi.serialization.record.Record;

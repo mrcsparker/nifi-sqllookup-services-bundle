@@ -21,7 +21,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.apache.nifi</groupId>
+    <groupId>com.mrcsparker</groupId>
     <artifactId>nifi-sqllookup-services-bundle</artifactId>
     <version>1.6.0</version>
   </parent>

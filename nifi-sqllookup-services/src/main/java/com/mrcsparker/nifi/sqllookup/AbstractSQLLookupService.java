@@ -1,4 +1,4 @@
-package org.apache.nifi.sqllookup;
+package com.mrcsparker.nifi.sqllookup;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import org.apache.nifi.annotation.lifecycle.OnDisabled;

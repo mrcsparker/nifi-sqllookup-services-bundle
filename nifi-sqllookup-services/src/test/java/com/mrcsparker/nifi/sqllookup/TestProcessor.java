@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.nifi.sqllookup;
+package com.mrcsparker.nifi.sqllookup;
 
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.lookup.LookupService;

@@ -1,4 +1,4 @@
-package org.apache.nifi.sqllookup;
+package com.mrcsparker.nifi.sqllookup;
 
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;

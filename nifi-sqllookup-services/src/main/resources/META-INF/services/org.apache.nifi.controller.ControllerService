@@ -1,2 +1,2 @@
-org.apache.nifi.sqllookup.SQLRecordLookupService
-org.apache.nifi.sqllookup.SQLLookupService
+com.mrcsparker.nifi.sqllookup.SQLRecordLookupService
+com.mrcsparker.nifi.sqllookup.SQLLookupService

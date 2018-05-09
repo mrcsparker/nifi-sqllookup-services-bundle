@@ -14,12 +14,3 @@ deploy:
     on:
       repo: mrcsparker/nifi-sqllookup-services-bundle
       tags: true
-  - provider: bintray
-    file: descriptor.json
-    user: mrcsparker
-    skip_cleanup: true
-    on:
-      repo: mrcsparker/nifi-sqllookup-services-bundle
-      tags: true
-    key:
-      secure: gkkrOHFmcCQ+38F5nu6cSfgH+ioRIx/+eromgfhiahnqooeFMPqg19eGT9iJLYrrMzAZBg5j+9spNAL9nEv+C9IZTPH7KQECJbxdHyzt4iewyjblxdLGNY7nPSOKHbZIQp6PSek2Kbn0P7MrhzsVafxBIQQeBNQynP8AixtTnqVsrXonfBzuyIOXf9Y8tpBsjX5Jgxste0PlI4Ymkv8oLXW4+XSbeIhTM4wIuw3w3fDATgFnzWKsukDaco154Yf7MEPQLXf81dTn3KjQ4rgtChluIg9R4QMhwreHgdMku0Yxa7aH+UAq0wm8x6J0SchIzJIaSVld20PyJ9JAeHregVF4HtSoxuyQgY3OOsd6eEg540tZIFrQ8Ad3fSgRzy882yjYUS9G3aT7HokFUBLVZznxqYWxRWRvFAx0c3waeNZRapLM0dpngQeeKZjw6OXPjamjiPDHC7eMXz8X7TPHs6J28zjJxddScg2f8WWwKeepCi5AIEpSq+9hYC7VGsUOHhRBO83MzQD0sZa8E2rcvnCPwxQ0zv0Padh4I1J+7vs+yNw0oU2MsPSASgqMwElXw+IGeaU7EIILHHhgGMactENcBOWXfiZD0Ovk36oGexmzOB+vwx1POtdJpOFW9ZqRYKfRa3tq/3a0Bd06BtRgg48DM4Hg8Pm4I0Zea9wqMd4=

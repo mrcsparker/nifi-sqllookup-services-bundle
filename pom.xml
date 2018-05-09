@@ -23,6 +23,9 @@
     </parent>
 
     <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.min-version>3.1.0</maven.min-version>
         <nifi.version>1.6.0</nifi.version>
         <caffeine.version>2.6.2</caffeine.version>
         <derby.version>10.14.1.0</derby.version>
@@ -32,8 +35,10 @@
         <mockito.version>2.18.0</mockito.version>
     </properties>
 
+    <groupId>com.mrcsparker</groupId>
     <artifactId>nifi-sqllookup-services-bundle</artifactId>
     <packaging>pom</packaging>
+    <version>1.6.0</version>
 
     <modules>
         <module>nifi-sqllookup-services</module>
@@ -41,6 +46,12 @@
         <module>nifi-sqllookup-services-api-nar</module>
         <module>nifi-sqllookup-services-nar</module>
     </modules>
+
+    <name>NiFi SQL Lookup Services Bundle</name>
+    <description>
+        NiFi controllers for SQL record and attributes lookups with built-in caching
+    </description>
+    <url>https://github.com/mrcsparker/nifi-sqllookup-services-bundle</url>
 
     <dependencyManagement>
         <dependencies>
@@ -70,11 +81,113 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${surefire.version}</version>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.8</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>release</name>
+                    <value>1</value>
+                </property>
+            </activation>
+            <build>
+
+                <plugins>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.0.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+
+            </build>
+        </profile>
+    </profiles>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Chris Parker</name>
+            <email>mrcsparker@gmail.com</email>
+            <organization>mrcsparker</organization>
+            <organizationUrl>http://blog.mrcsparker.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/mrcsparker/nifi-sqllookup-services-bundle</url>
+        <connection>scm:git:git://github.com/mrcsparker/nifi-sqllookup-services-bundle.git</connection>
+        <developerConnection>scm:git:git@github.com:mrcsparker/nifi-sqllookup-services-bundle.git</developerConnection>
+    </scm>
 
 </project>
