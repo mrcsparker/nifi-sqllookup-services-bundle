@@ -20,12 +20,12 @@
     "name": "1.6.0",
     "desc": "v1.6.0",
     "released": "2018-05-08",
-    "vcs_tag": "1.6.0-3",
+    "vcs_tag": "1.6.0-4",
     "gpgSign": false,
     "attributes": [ {"name": "maturity", "values": ["Stable"], "type": "string"} ]
   },
   "files": [{
-    "includePattern": "./*/target/*.nar",
+    "includePattern": "(.*)/target/(.*).nar",
     "uploadPattern": "/$1"
   }],
   "publish": true
