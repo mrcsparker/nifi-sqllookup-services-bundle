@@ -50,7 +50,7 @@ public class TestSQLRecordLookupServiceWithCache extends AbstractSQLLookupServic
         sqlRecordLookupService = new SQLRecordLookupService();
         runner.addControllerService("SQLRecordLookupService", sqlRecordLookupService);
         runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.CONNECTION_POOL, "dbcpService");
-        runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.SQL_QUERY, "SELECT * FROM TEST_LOOKUP_DB WHERE name = ?");
+        runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.SQL_QUERY, "SELECT * FROM TEST_LOOKUP_DB WHERE name = :name");
         runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.CACHE_SIZE, "10");
 
         runner.enableControllerService(dbcpService);
@@ -65,7 +65,7 @@ public class TestSQLRecordLookupServiceWithCache extends AbstractSQLLookupServic
         assertEquals(sqlRecordLookupService.getCacheSize(), 0);
 
         for (int i = 0; i <= 10; i++) {
-            final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("key", "458006613841984"));
+            final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("name", "458006613841984"));
             assertTrue(get1.isPresent());
             assertEquals("458006613841984", get1.get().getAsString("NAME"));
             assertEquals("The Glory and the Dream", get1.get().getAsString("VALUE"));
@@ -82,40 +82,40 @@ public class TestSQLRecordLookupServiceWithCache extends AbstractSQLLookupServic
 
         assertEquals(sqlRecordLookupService.getCacheSize(), 0);
 
-        sqlRecordLookupService.lookup(Collections.singletonMap("key", "458006613841984"));
+        sqlRecordLookupService.lookup(Collections.singletonMap("name", "458006613841984"));
         assertEquals(sqlRecordLookupService.getCacheSize(), 1);
 
-        sqlRecordLookupService.lookup(Collections.singletonMap("key", "456148015917293"));
+        sqlRecordLookupService.lookup(Collections.singletonMap("name", "456148015917293"));
         assertEquals(sqlRecordLookupService.getCacheSize(), 2);
 
-        sqlRecordLookupService.lookup(Collections.singletonMap("key", "526924199146123"));
+        sqlRecordLookupService.lookup(Collections.singletonMap("name", "526924199146123"));
         assertEquals(sqlRecordLookupService.getCacheSize(), 3);
 
-        sqlRecordLookupService.lookup(Collections.singletonMap("key", "860683959429897"));
+        sqlRecordLookupService.lookup(Collections.singletonMap("name", "860683959429897"));
         assertEquals(sqlRecordLookupService.getCacheSize(), 4);
 
-        sqlRecordLookupService.lookup(Collections.singletonMap("key", "528661513839698"));
+        sqlRecordLookupService.lookup(Collections.singletonMap("name", "528661513839698"));
         assertEquals(sqlRecordLookupService.getCacheSize(), 5);
 
-        sqlRecordLookupService.lookup(Collections.singletonMap("key", "355663598958946"));
+        sqlRecordLookupService.lookup(Collections.singletonMap("name", "355663598958946"));
         assertEquals(sqlRecordLookupService.getCacheSize(), 6);
 
-        sqlRecordLookupService.lookup(Collections.singletonMap("key", "911753660676323"));
+        sqlRecordLookupService.lookup(Collections.singletonMap("name", "911753660676323"));
         assertEquals(sqlRecordLookupService.getCacheSize(), 7);
 
-        sqlRecordLookupService.lookup(Collections.singletonMap("key", "997417069743624"));
+        sqlRecordLookupService.lookup(Collections.singletonMap("name", "997417069743624"));
         assertEquals(sqlRecordLookupService.getCacheSize(), 8);
 
-        sqlRecordLookupService.lookup(Collections.singletonMap("key", "986873446696583"));
+        sqlRecordLookupService.lookup(Collections.singletonMap("name", "986873446696583"));
         assertEquals(sqlRecordLookupService.getCacheSize(), 9);
 
-        sqlRecordLookupService.lookup(Collections.singletonMap("key", "990409804141864"));
+        sqlRecordLookupService.lookup(Collections.singletonMap("name", "990409804141864"));
         assertEquals(sqlRecordLookupService.getCacheSize(), 10);
 
-        sqlRecordLookupService.lookup(Collections.singletonMap("key", "990409804141864"));
+        sqlRecordLookupService.lookup(Collections.singletonMap("name", "990409804141864"));
         assertEquals(sqlRecordLookupService.getCacheSize(), 10);
 
-        sqlRecordLookupService.lookup(Collections.singletonMap("key", "990409804141864"));
+        sqlRecordLookupService.lookup(Collections.singletonMap("name", "990409804141864"));
         assertEquals(sqlRecordLookupService.getCacheSize(), 10);
     }
 

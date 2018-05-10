@@ -9,11 +9,10 @@ import org.apache.nifi.lookup.LookupFailureException;
 import org.apache.nifi.lookup.LookupService;
 import org.apache.nifi.processor.util.StandardValidators;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import static java.util.Collections.singleton;
 
 abstract class AbstractSQLLookupService<T> extends AbstractControllerService implements LookupService<T> {
 
@@ -60,51 +59,30 @@ abstract class AbstractSQLLookupService<T> extends AbstractControllerService imp
 
     Cache<String, T> cache;
 
-    private static final String KEY = "key";
-    static final Set<String> KEYS = singleton(KEY);
     Integer cacheSize;
 
     @Override
     public Optional<T> lookup(Map<String, Object> coordinates) throws LookupFailureException {
 
-        if (coordinates == null || coordinates.size() != 1) {
+        if (coordinates == null || coordinates.size() == 0) {
             return Optional.empty();
         }
 
-        if (!coordinates.containsKey(KEY)) {
-            throw new LookupFailureException("Required key " + KEY + " was not present in the lookup.");
-        }
-
-        String key = coordinates.get(KEY).toString();
-
         if (cacheSize > 0) {
-            return cacheLookup(key);
+            return cacheLookup(coordinates);
         }
 
-        return databaseLookup(key);
+        return databaseLookup(coordinates);
     }
 
-    public Optional<T> databaseLookup(String key) throws LookupFailureException {
-        if (isJson(key)) {
-            return namedParamDatabaseLookup(key);
-        }
-        return paramDatabaseLookup(key);
-    }
+    abstract Optional<T> databaseLookup(Map<String, Object> coordinates) throws LookupFailureException;
 
-    abstract Optional<T> paramDatabaseLookup(String key) throws LookupFailureException;
+    abstract Optional<T> cacheLookup(Map<String, Object> coordinates) throws LookupFailureException;
 
-    abstract Optional<T> namedParamDatabaseLookup(String key) throws LookupFailureException;
-
-    abstract Optional<T> cacheLookup(String key) throws LookupFailureException;
-
-    protected boolean isJson(String value) {
-        if (value.isEmpty()) return false;
-        return value.trim().toCharArray()[0] == '{';
-    }
 
     @Override
     public Set<String> getRequiredKeys() {
-        return KEYS;
+        return Collections.emptySet();
     }
 
     public long getCacheSize() {

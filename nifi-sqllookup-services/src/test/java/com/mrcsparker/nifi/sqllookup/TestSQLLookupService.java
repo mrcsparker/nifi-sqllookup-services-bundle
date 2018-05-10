@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Collections.singleton;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -36,6 +35,7 @@ public class TestSQLLookupService extends AbstractSQLLookupServiceTest {
 
     static final Logger LOG = LoggerFactory.getLogger(TestSQLLookupService.class);
 
+    private DBCPService dbcpService = new DBCPServiceSimpleImpl();
     private SQLLookupService sqlLookupService;
 
     @Before
@@ -44,7 +44,6 @@ public class TestSQLLookupService extends AbstractSQLLookupServiceTest {
         runner = TestRunners.newTestRunner(testProcessor);
 
         // setup mock DBCP Service
-        DBCPService dbcpService = new DBCPServiceSimpleImpl();
         Map<String, String> dbcpProperties = new HashMap<>();
 
         runner.addControllerService("dbcpService", dbcpService, dbcpProperties);
@@ -54,7 +53,7 @@ public class TestSQLLookupService extends AbstractSQLLookupServiceTest {
         sqlLookupService = new SQLLookupService();
         runner.addControllerService("SQLRecordLookupService", sqlLookupService);
         runner.setProperty(sqlLookupService, SQLLookupService.CONNECTION_POOL, "dbcpService");
-        runner.setProperty(sqlLookupService, SQLLookupService.SQL_QUERY, "SELECT * FROM TEST_LOOKUP_DB WHERE name = ?");
+        runner.setProperty(sqlLookupService, SQLLookupService.SQL_QUERY, "SELECT * FROM TEST_LOOKUP_DB WHERE name = :name");
         runner.setProperty(sqlLookupService, SQLLookupService.LOOKUP_VALUE_COLUMN, "VALUE");
         runner.enableControllerService(dbcpService);
         runner.enableControllerService(sqlLookupService);
@@ -64,7 +63,7 @@ public class TestSQLLookupService extends AbstractSQLLookupServiceTest {
 
     @Test
     public void testCorrectKeys() throws Exception {
-        assertEquals(sqlLookupService.getRequiredKeys(), singleton("key"));
+        assertEquals(sqlLookupService.getRequiredKeys(), Collections.emptySet());
     }
 
     @Test
@@ -74,40 +73,74 @@ public class TestSQLLookupService extends AbstractSQLLookupServiceTest {
 
     @Test
     public void testSimpleLookup0() throws Exception {
-        final Optional<String> get1 = sqlLookupService.lookup(Collections.singletonMap("key", "547897511298456"));
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("name", "547897511298456");
+
+        final Optional<String> get1 = sqlLookupService.lookup(criteria);
         assertTrue(get1.isPresent());
         assertEquals("Consider the Lilies", get1.get());
     }
 
     @Test
     public void testSimpleLookup1() throws Exception {
-        final Optional<String> get1 = sqlLookupService.lookup(Collections.singletonMap("key", "867142279069316"));
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("name", "867142279069316");
+
+        final Optional<String> get1 = sqlLookupService.lookup(criteria);
         assertTrue(get1.isPresent());
         assertEquals("The Needles Eye", get1.get());
     }
 
     @Test
     public void testSimpleLookup2() throws Exception {
-        final Optional<String> get1 = sqlLookupService.lookup(Collections.singletonMap("key", "443771414357476"));
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("name", "443771414357476");
+
+        final Optional<String> get1 = sqlLookupService.lookup(criteria);
         assertTrue(get1.isPresent());
         assertEquals("Françoise Sagan", get1.get());
     }
 
     @Test
+    public void testMultiValueLookup0() throws Exception {
+        runner.disableControllerService(sqlLookupService);
+        runner.setProperty(sqlLookupService, SQLLookupService.SQL_QUERY, "SELECT * FROM TEST_LOOKUP_DB WHERE name = :name AND address = :address");
+        runner.assertValid(sqlLookupService);
+        runner.enableControllerService(sqlLookupService);
+
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("name", "990192861112958");
+        criteria.put("address", "84759 Jerrell Manors");
+
+        final Optional<String> get1 = sqlLookupService.lookup(criteria);
+        assertTrue(get1.isPresent());
+        assertEquals("Cabbages and Kings", get1.get());
+    }
+
+    @Test
     public void testEmptyLookup() throws Exception {
-        final Optional<String> get1 = sqlLookupService.lookup(Collections.singletonMap("key", ""));
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("name", "");
+
+        final Optional<String> get1 = sqlLookupService.lookup(criteria);
         assertEquals(Optional.empty(), get1);
     }
 
     @Test
     public void testInvalidLookup() throws Exception {
-        final Optional<String> get1 = sqlLookupService.lookup(Collections.singletonMap("key", "notavalue"));
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("name", "notavalue");
+
+        final Optional<String> get1 = sqlLookupService.lookup(criteria);
         assertEquals(Optional.empty(), get1);
     }
 
     @Test
     public void testNullLookup() throws Exception {
-        final Optional<String> get1 = sqlLookupService.lookup(Collections.singletonMap("key", "is-a-null"));
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("name", "is-a-null");
+
+        final Optional<String> get1 = sqlLookupService.lookup(criteria);
         assertEquals(Optional.empty(), get1);
     }
 

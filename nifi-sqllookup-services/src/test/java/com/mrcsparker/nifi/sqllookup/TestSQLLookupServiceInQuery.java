@@ -7,16 +7,12 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
-import static java.util.Collections.singleton;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class TestSQLNamedLookupServiceInQuery extends AbstractSQLLookupServiceTest {
+public class TestSQLLookupServiceInQuery extends AbstractSQLLookupServiceTest {
     static final Logger LOG = LoggerFactory.getLogger(TestSQLLookupService.class);
 
     private SQLLookupService sqlNamedLookupService;
@@ -47,7 +43,7 @@ public class TestSQLNamedLookupServiceInQuery extends AbstractSQLLookupServiceTe
 
     @Test
     public void testCorrectKeys() throws Exception {
-        assertEquals(sqlNamedLookupService.getRequiredKeys(), singleton("key"));
+        assertEquals(sqlNamedLookupService.getRequiredKeys(), Collections.emptySet());
     }
 
     @Test
@@ -57,7 +53,9 @@ public class TestSQLNamedLookupServiceInQuery extends AbstractSQLLookupServiceTe
 
     @Test
     public void testSimpleLookup0() throws Exception {
-        final Optional<String> get1 = sqlNamedLookupService.lookup(Collections.singletonMap("key", "{ \"name\": [547897511298456, 867142279069316] }"));
+
+        List names = Arrays.asList(547897511298456L, 867142279069316L);
+        final Optional<String> get1 = sqlNamedLookupService.lookup(Collections.singletonMap("name", names));
         assertTrue(get1.isPresent());
         assertEquals("Consider the Lilies", get1.get());
     }

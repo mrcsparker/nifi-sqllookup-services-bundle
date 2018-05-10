@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Collections.singleton;
 import static org.junit.Assert.*;
 
 public class TestSQLRecordLookupService extends AbstractSQLLookupServiceTest {
@@ -50,7 +49,7 @@ public class TestSQLRecordLookupService extends AbstractSQLLookupServiceTest {
         sqlRecordLookupService = new SQLRecordLookupService();
         runner.addControllerService("SQLRecordLookupService", sqlRecordLookupService);
         runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.CONNECTION_POOL, "dbcpService");
-        runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.SQL_QUERY, "SELECT * FROM TEST_LOOKUP_DB WHERE name = ?");
+        runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.SQL_QUERY, "SELECT * FROM TEST_LOOKUP_DB WHERE name = :name");
         runner.enableControllerService(dbcpService);
         runner.enableControllerService(sqlRecordLookupService);
 
@@ -59,7 +58,7 @@ public class TestSQLRecordLookupService extends AbstractSQLLookupServiceTest {
 
     @Test
     public void testCorrectKeys() throws Exception {
-        assertEquals(sqlRecordLookupService.getRequiredKeys(), singleton("key"));
+        assertEquals(sqlRecordLookupService.getRequiredKeys(), Collections.emptySet());
     }
 
     @Test
@@ -75,40 +74,40 @@ public class TestSQLRecordLookupService extends AbstractSQLLookupServiceTest {
 
     @Test
     public void testSimpleLookup0() throws Exception {
-        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("key", "547897511298456"));
+        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("name", "547897511298456"));
         assertTrue(get1.isPresent());
         assertEquals("Consider the Lilies", get1.get().getAsString("VALUE"));
     }
 
     @Test
     public void testSimpleLookup1() throws Exception {
-        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("key", "867142279069316"));
+        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("name", "867142279069316"));
         assertTrue(get1.isPresent());
         assertEquals("The Needles Eye", get1.get().getAsString("VALUE"));
     }
 
     @Test
     public void testSimpleLookup2() throws Exception {
-        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("key", "443771414357476"));
+        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("name", "443771414357476"));
         assertTrue(get1.isPresent());
         assertEquals("Françoise Sagan", get1.get().getAsString("VALUE"));
     }
 
     @Test
     public void testEmptyLookup() throws Exception {
-        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("key", ""));
+        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("name", ""));
         assertEquals(Optional.empty(), get1);
     }
 
     @Test
     public void testInvalidLookup() throws Exception {
-        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("key", "notavalue"));
+        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("name", "notavalue"));
         assertEquals(Optional.empty(), get1);
     }
 
     @Test
     public void testRecordLookup() throws Exception {
-        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("key", "443771414357476"));
+        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("name", "443771414357476"));
         assertTrue(get1.isPresent());
         assertEquals("443771414357476", get1.get().getAsString("NAME"));
         assertEquals("Françoise Sagan", get1.get().getAsString("VALUE"));
@@ -119,7 +118,7 @@ public class TestSQLRecordLookupService extends AbstractSQLLookupServiceTest {
 
     @Test
     public void testNullLookup() throws Exception {
-        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("key", "is-a-null"));
+        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("name", "is-a-null"));
         assertTrue(get1.isPresent());
         assertNull(get1.get().getAsString("VALUE"));
     }

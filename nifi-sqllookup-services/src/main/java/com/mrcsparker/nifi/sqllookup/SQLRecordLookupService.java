@@ -16,8 +16,6 @@
  */
 package com.mrcsparker.nifi.sqllookup;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.nifi.annotation.documentation.CapabilityDescription;
@@ -71,7 +69,7 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
 
     @Override
     public Set<String> getRequiredKeys() {
-        return KEYS;
+        return Collections.emptySet();
     }
 
     @Override
@@ -80,32 +78,7 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
     }
 
     @Override
-    Optional<Record> paramDatabaseLookup(String key) throws LookupFailureException {
-
-        try (final Connection connection = dbcpService.getConnection();
-             final PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
-
-            preparedStatement.setString(1, key);
-            preparedStatement.setQueryTimeout(queryTimeout);
-            preparedStatement.execute();
-
-            final ResultSet resultSet = preparedStatement.getResultSet();
-            final RecordSchema schema = new SimpleRecordSchema(new ArrayList<>());
-            final ResultSetRecordSet resultSetRecordSet = new ResultSetRecordSet(resultSet, schema);
-
-            return Optional.of(resultSetRecordSet.next());
-
-        } catch (final ProcessException | SQLException e) {
-            getLogger().error("Error during lookup: {}", new Object[] { key }, e);
-            throw new LookupFailureException(e);
-        } catch (final NullPointerException | IOException e) {
-            return Optional.empty();
-        }
-    }
-
-    @Override
-    Optional<Record> namedParamDatabaseLookup(String key) throws LookupFailureException {
-
+    Optional<Record> databaseLookup(Map<String, Object> coordinates) throws LookupFailureException {
         final DataSource dataSource = new BasicDataSource() {
             @Override
             public Connection getConnection() throws SQLException {
@@ -114,19 +87,10 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
         };
 
         SQLNamedParameterJdbcTemplate jdbcTemplate = new SQLNamedParameterJdbcTemplate(dataSource);
-
-        Map<String, Object> map;
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            map = mapper.readValue(key, new TypeReference<Map<String, Object>>(){});
-        } catch (IOException e) {
-            getLogger().error("Error during lookup: {}", new Object[] { key }, e);
-            return Optional.empty();
-        }
-
         MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
-        for (String col : map.keySet()) {
-            mapSqlParameterSource.addValue(col, map.get(col));
+
+        for (String column : coordinates.keySet()) {
+            mapSqlParameterSource.addValue(column, coordinates.get(column));
         }
 
         PreparedStatementCreator preparedStatementCreator = jdbcTemplate.getPreparedStatement(sqlQuery, mapSqlParameterSource);
@@ -144,23 +108,24 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
             return Optional.of(resultSetRecordSet.next());
 
         } catch (final ProcessException | SQLException e) {
-            getLogger().error("Error during lookup: {}", new Object[] { key }, e);
+            getLogger().error("Error during lookup: {}", new Object[] { coordinates.toString() }, e);
             throw new LookupFailureException(e);
         } catch (final NullPointerException | IOException e) {
             return Optional.empty();
         }
+
     }
 
     @Override
-    protected Optional<Record> cacheLookup(String key) throws LookupFailureException {
-        String cacheKey = key + ":" + sqlQuery;
+    protected Optional<Record> cacheLookup(Map<String, Object> coordinates) throws LookupFailureException {
+        String cacheKey = sqlQuery + ":" + coordinates.hashCode();
 
         Record record = cache.getIfPresent(cacheKey);
         if (record != null) {
             return Optional.of(record);
         }
 
-        Optional<Record> lookupRecord = databaseLookup(key);
+        Optional<Record> lookupRecord = databaseLookup(coordinates);
         if (lookupRecord.isPresent()) {
             cache.put(cacheKey, lookupRecord.get());
 
