@@ -61,6 +61,8 @@ abstract class AbstractSQLLookupService<T> extends AbstractControllerService imp
 
     Integer cacheSize;
 
+    Boolean useJDBCTypes;
+
     @Override
     public Optional<T> lookup(Map<String, Object> coordinates) throws LookupFailureException {
 

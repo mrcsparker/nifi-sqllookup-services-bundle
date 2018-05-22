@@ -18,18 +18,21 @@ package com.mrcsparker.nifi.sqllookup;
 
 import org.apache.nifi.dbcp.DBCPService;
 import org.apache.nifi.serialization.record.Record;
+import org.apache.nifi.serialization.record.RecordFieldType;
+import org.apache.nifi.serialization.record.util.DataTypeUtils;
 import org.apache.nifi.util.TestRunners;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
 public class TestSQLRecordLookupService extends AbstractSQLLookupServiceTest {
+
+    static final Logger LOG = LoggerFactory.getLogger(TestSQLRecordLookupService.class);
 
     private SQLRecordLookupService sqlRecordLookupService;
 
@@ -107,6 +110,45 @@ public class TestSQLRecordLookupService extends AbstractSQLLookupServiceTest {
 
     @Test
     public void testRecordLookup() throws Exception {
+        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("name", "443771414357476"));
+        assertTrue(get1.isPresent());
+        assertEquals("443771414357476", get1.get().getAsString("NAME"));
+        assertEquals("Françoise Sagan", get1.get().getAsString("VALUE"));
+        assertEquals(9, get1.get().getAsInt("PERIOD").intValue());
+        assertEquals("96098 Walter Mall", get1.get().getAsString("ADDRESS"));
+        assertEquals(24.67, get1.get().getAsDouble("PRICE"), 1.0);
+    }
+
+    @Test
+    public void testArrayLookup() throws Exception {
+        runner.disableControllerService(sqlRecordLookupService);
+        runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.USE_JDBC_TYPES, "true");
+        runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.SQL_QUERY, "SELECT array_agg(VALUE ORDER BY NAME DESC) AS LOTSA FROM TEST_LOOKUP_DB WHERE NAME IN(:name)");
+        runner.assertValid(sqlRecordLookupService);
+        runner.enableControllerService(sqlRecordLookupService);
+
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("name", Arrays.asList(
+                "990192861112958",
+                "012470853914233",
+                "912066265194017"
+        ));
+        String[] stringArray = {"Cabbages and Kings", "A Handful of Dust", "In Death Ground"};
+        Object[] resultArray = DataTypeUtils.convertRecordArrayToJavaArray(stringArray, RecordFieldType.STRING.getDataType());
+
+        final Optional<Record> get1 = sqlRecordLookupService.lookup(criteria);
+        assertTrue(get1.isPresent());
+
+        assertArrayEquals(resultArray, get1.get().getAsArray("LOTSA"));
+    }
+
+    @Test
+    public void testExpressionLanguage() throws Exception {
+        runner.disableControllerService(sqlRecordLookupService);
+        runner.setProperty(sqlRecordLookupService, SQLLookupService.SQL_QUERY, "${literal(\"SELECT * FROM TEST_LOOKUP_DB WHERE name = \"):append(\":name\"):append(\";\")}");
+        runner.assertValid(sqlRecordLookupService);
+        runner.enableControllerService(sqlRecordLookupService);
+
         final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("name", "443771414357476"));
         assertTrue(get1.isPresent());
         assertEquals("443771414357476", get1.get().getAsString("NAME"));

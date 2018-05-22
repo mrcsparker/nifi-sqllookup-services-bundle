@@ -52,14 +52,14 @@ public class AbstractSQLLookupServiceTest {
         Statement stmt = con.createStatement();
 
         try {
-            stmt.execute("drop table TEST_LOOKUP_DB");
+            stmt.execute("drop table IF EXISTS TEST_LOOKUP_DB");
         } catch (final SQLException sqle) {
             sqle.printStackTrace();
         }
 
-        stmt.execute("CREATE TABLE TEST_LOOKUP_DB " +
+        stmt.execute("CREATE TABLE IF NOT EXISTS TEST_LOOKUP_DB " +
                 "( " +
-                "    id BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY(START WITH 1, INCREMENT BY 1), " +
+                "    id serial not null constraint test_lookup_db_pk primary key, " +
                 "    name VARCHAR(30), " +
                 "    value VARCHAR(255), " +
                 "    period INT DEFAULT 1, " +
@@ -185,8 +185,8 @@ public class AbstractSQLLookupServiceTest {
         @Override
         public Connection getConnection() throws ProcessException {
             try {
-                Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
-                return DriverManager.getConnection("jdbc:derby:" + DB_LOCATION + ";create=true");
+                Class.forName("org.hsqldb.jdbcDriver");
+                return DriverManager.getConnection("jdbc:hsqldb:mem:test;sql.syntax_pgs=true");
             } catch (final Exception e) {
                 throw new ProcessException("getConnection failed: " + e);
             }

@@ -26,10 +26,9 @@ import org.apache.nifi.controller.ConfigurationContext;
 import org.apache.nifi.dbcp.DBCPService;
 import org.apache.nifi.lookup.LookupFailureException;
 import org.apache.nifi.processor.exception.ProcessException;
+import org.apache.nifi.processor.util.StandardValidators;
 import org.apache.nifi.serialization.SimpleRecordSchema;
-import org.apache.nifi.serialization.record.Record;
-import org.apache.nifi.serialization.record.RecordSchema;
-import org.apache.nifi.serialization.record.ResultSetRecordSet;
+import org.apache.nifi.serialization.record.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -37,10 +36,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -53,12 +49,26 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
     static final Logger LOG = LoggerFactory.getLogger(SQLRecordLookupService.class);
     private final List<PropertyDescriptor> propertyDescriptors;
 
+    static final PropertyDescriptor USE_JDBC_TYPES =
+            new PropertyDescriptor.Builder()
+                    .name("use-jdbc-types")
+                    .displayName("Use JDBC types")
+                    .description("Use Built-in JDBC to Record type conversion.\n" +
+                            "If this is not selected it will use the NIFI ResultRecordSet to convert into a Record.\n" +
+                            "Use this if you are returning array types from a SQL query.")
+                    .defaultValue("false")
+                    .allowableValues("true", "false")
+                    .required(true)
+                    .addValidator(StandardValidators.BOOLEAN_VALIDATOR)
+                    .build();
+
     public SQLRecordLookupService() {
         final List<PropertyDescriptor> pds = new ArrayList<>();
         pds.add(CONNECTION_POOL);
         pds.add(SQL_QUERY);
         pds.add(QUERY_TIMEOUT);
         pds.add(CACHE_SIZE);
+        pds.add(USE_JDBC_TYPES);
         propertyDescriptors = Collections.unmodifiableList(pds);
     }
 
@@ -77,8 +87,16 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
         return Record.class;
     }
 
+
     @Override
     Optional<Record> databaseLookup(Map<String, Object> coordinates) throws LookupFailureException {
+        if (useJDBCTypes) {
+            return jdbcDatabaseLookup(coordinates);
+        }
+        return resultRecordSetDatabaseLookup(coordinates);
+    }
+
+    Optional<Record> resultRecordSetDatabaseLookup(Map<String, Object> coordinates) throws LookupFailureException {
         final DataSource dataSource = new BasicDataSource() {
             @Override
             public Connection getConnection() throws SQLException {
@@ -113,7 +131,55 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
         } catch (final NullPointerException | IOException e) {
             return Optional.empty();
         }
+    }
 
+    Optional<Record> jdbcDatabaseLookup(Map<String, Object> coordinates) throws LookupFailureException {
+        final DataSource dataSource = new BasicDataSource() {
+            @Override
+            public Connection getConnection() throws SQLException {
+                return dbcpService.getConnection();
+            }
+        };
+
+        SQLNamedParameterJdbcTemplate jdbcTemplate = new SQLNamedParameterJdbcTemplate(dataSource);
+        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
+
+        for (String column : coordinates.keySet()) {
+            mapSqlParameterSource.addValue(column, coordinates.get(column));
+        }
+
+        PreparedStatementCreator preparedStatementCreator = jdbcTemplate.getPreparedStatement(sqlQuery, mapSqlParameterSource);
+
+        try (final Connection connection = dbcpService.getConnection();
+             final PreparedStatement preparedStatement = preparedStatementCreator.createPreparedStatement(connection)) {
+
+            preparedStatement.setQueryTimeout(queryTimeout);
+            preparedStatement.execute();
+
+            final ResultSet resultSet = preparedStatement.getResultSet();
+            final ResultSetMetaData metaData = resultSet.getMetaData();
+            List<RecordField> fields = new ArrayList<>();
+            Map<String, Object> results = new HashMap<>();
+
+            if (resultSet.next()) {
+                for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                    String column = metaData.getColumnLabel(i);
+                    int sqlType = metaData.getColumnType(i);
+                    fields.add(new RecordField(column, JDBCType.getType(sqlType)));
+                    Object value = JDBCType.getValue(resultSet, sqlType, i);
+                    results.put(column, value);
+                }
+                return Optional.of(new MapRecord(new SimpleRecordSchema(fields), results));
+            }
+            return Optional.empty();
+
+
+        } catch (final ProcessException | SQLException e) {
+            getLogger().error("Error during lookup: {}", new Object[]{coordinates.toString()}, e);
+            throw new LookupFailureException(e);
+        } catch (final NullPointerException e) {
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -141,6 +207,7 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
         this.sqlQuery = context.getProperty(SQL_QUERY).evaluateAttributeExpressions().getValue();
         this.queryTimeout = context.getProperty(QUERY_TIMEOUT).asTimePeriod(TimeUnit.SECONDS).intValue();
         this.cacheSize = context.getProperty(CACHE_SIZE).asInteger();
+        this.useJDBCTypes = context.getProperty(USE_JDBC_TYPES).asBoolean();
 
         cache = Caffeine.newBuilder().maximumSize(cacheSize).build();
     }

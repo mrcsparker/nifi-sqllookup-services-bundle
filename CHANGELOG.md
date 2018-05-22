@@ -6,6 +6,10 @@
 
 - Bintray support
 - Changelog
+- Moved to H2 to test PostgreSQL compat
+- Only use named parameters
+- Changed namespace to `com.mrcsparker`
+- Added `USE_JDBC_TYPES` to override `ResultSetRecordSet`. Hit an issue returning array types in NiFi and this fixes it.
 
 ### Changed
 
