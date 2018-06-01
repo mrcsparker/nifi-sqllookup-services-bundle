@@ -45,7 +45,5 @@ These controllers were designed to be flexible and fast. They support:
 * [Data flow enrichment with NiFi part 3: LookupRecord with MongoDB](https://community.hortonworks.com/articles/146198/data-flow-enrichment-with-nifi-part-3-lookuprecord.html)
 
 
-# Maven
-
 
 

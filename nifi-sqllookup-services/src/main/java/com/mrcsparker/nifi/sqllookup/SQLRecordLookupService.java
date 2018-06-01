@@ -157,27 +157,16 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
             preparedStatement.execute();
 
             final ResultSet resultSet = preparedStatement.getResultSet();
-            final ResultSetMetaData metaData = resultSet.getMetaData();
-            List<RecordField> fields = new ArrayList<>();
-            Map<String, Object> results = new HashMap<>();
+            final RecordSchema schema = new SimpleRecordSchema(new ArrayList<>());
+            final SQLResultSetRecordSet resultSetRecordSet = new SQLResultSetRecordSet(resultSet, schema);
 
-            if (resultSet.next()) {
-                for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                    String column = metaData.getColumnLabel(i);
-                    int sqlType = metaData.getColumnType(i);
-                    fields.add(new RecordField(column, JDBCType.getType(sqlType)));
-                    Object value = JDBCType.getValue(resultSet, sqlType, i);
-                    results.put(column, value);
-                }
-                return Optional.of(new MapRecord(new SimpleRecordSchema(fields), results));
-            }
-            return Optional.empty();
+            return Optional.of(resultSetRecordSet.next());
 
 
         } catch (final ProcessException | SQLException e) {
             getLogger().error("Error during lookup: {}", new Object[]{coordinates.toString()}, e);
             throw new LookupFailureException(e);
-        } catch (final NullPointerException e) {
+        } catch (final NullPointerException | IOException e) {
             return Optional.empty();
         }
     }

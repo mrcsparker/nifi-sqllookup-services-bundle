@@ -1,0 +1,9 @@
+{
+    "name": "periodNames",
+    "namespace": "nifi",
+    "type": "record",
+    "fields": [
+        { "name": "period", "type": "int" },
+        { "name": "names", "type": [ "null", { "type": "array", "items": "string" } ] }
+    ]
+}
