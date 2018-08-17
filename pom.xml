@@ -19,14 +19,14 @@
     <parent>
         <groupId>org.apache.nifi</groupId>
         <artifactId>nifi-nar-bundles</artifactId>
-        <version>1.6.0</version>
+        <version>1.7.1</version>
     </parent>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.min-version>3.1.0</maven.min-version>
-        <nifi.version>1.6.0</nifi.version>
+        <nifi.version>1.7.1</nifi.version>
         <caffeine.version>2.6.2</caffeine.version>
         <h2.version>1.4.197</h2.version>
         <junit.version>4.12</junit.version>
@@ -38,7 +38,7 @@
     <groupId>com.mrcsparker</groupId>
     <artifactId>nifi-sqllookup-services-bundle</artifactId>
     <packaging>pom</packaging>
-    <version>1.6.0</version>
+    <version>1.7.1</version>
 
     <modules>
         <module>nifi-sqllookup-services</module>
