@@ -25,7 +25,6 @@ public class TestSQLRecordLookupServiceWithSchema extends AbstractSQLLookupServi
 
     static final Logger LOG = LoggerFactory.getLogger(TestSQLRecordLookupServiceWithSchema.class);
 
-    private TestRunner runner;
     private SQLRecordLookupService sqlRecordLookupService;
     private JsonTreeReader recordReader;
     private JsonRecordSetWriter recordWriter;
