@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.mrcsparker</groupId>
         <artifactId>nifi-sqllookup-services-bundle</artifactId>
-        <version>1.6.0</version>
+        <version>1.7.1</version>
     </parent>
 
     <artifactId>nifi-sqllookup-services</artifactId>
@@ -28,8 +28,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.nifi</groupId>
+            <groupId>com.mrcsparker</groupId>
             <artifactId>nifi-sqllookup-services-api</artifactId>
+            <version>${version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.nifi</groupId>
