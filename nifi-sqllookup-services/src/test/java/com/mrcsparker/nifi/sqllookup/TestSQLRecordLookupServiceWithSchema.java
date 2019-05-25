@@ -6,7 +6,6 @@ import org.apache.nifi.json.JsonTreeReader;
 import org.apache.nifi.processors.standard.LookupRecord;
 import org.apache.nifi.schema.access.SchemaAccessUtils;
 import org.apache.nifi.serialization.record.Record;
-import org.apache.nifi.util.TestRunner;
 import org.apache.nifi.util.TestRunners;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,8 +25,6 @@ public class TestSQLRecordLookupServiceWithSchema extends AbstractSQLLookupServi
     static final Logger LOG = LoggerFactory.getLogger(TestSQLRecordLookupServiceWithSchema.class);
 
     private SQLRecordLookupService sqlRecordLookupService;
-    private JsonTreeReader recordReader;
-    private JsonRecordSetWriter recordWriter;
 
     @Before
     public void setup() throws Exception {
@@ -35,7 +32,7 @@ public class TestSQLRecordLookupServiceWithSchema extends AbstractSQLLookupServi
         runner.setProperty("period", "/period");
 
         final String inputSchemaText = new String(Files.readAllBytes(Paths.get("src/test/resources/period-names.avsc")));
-        recordReader = new JsonTreeReader();
+        JsonTreeReader recordReader = new JsonTreeReader();
         runner.addControllerService("reader", recordReader);
         runner.setProperty(recordReader, SchemaAccessUtils.SCHEMA_ACCESS_STRATEGY, SchemaAccessUtils.SCHEMA_TEXT_PROPERTY);
         runner.setProperty(recordReader, SchemaAccessUtils.SCHEMA_TEXT, inputSchemaText);
@@ -43,7 +40,7 @@ public class TestSQLRecordLookupServiceWithSchema extends AbstractSQLLookupServi
         runner.enableControllerService(recordReader);
 
         final String outputSchemaText = new String(Files.readAllBytes(Paths.get("src/test/resources/period-names.avsc")));
-        recordWriter = new JsonRecordSetWriter();
+        JsonRecordSetWriter recordWriter = new JsonRecordSetWriter();
         runner.addControllerService("writer", recordWriter);
         runner.setProperty(recordWriter, SchemaAccessUtils.SCHEMA_ACCESS_STRATEGY, SchemaAccessUtils.SCHEMA_TEXT_PROPERTY);
         runner.setProperty(recordWriter, SchemaAccessUtils.SCHEMA_TEXT, outputSchemaText);

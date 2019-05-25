@@ -17,11 +17,12 @@
 package com.mrcsparker.nifi.sqllookup;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.nifi.annotation.lifecycle.OnEnabled;
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.controller.ConfigurationContext;
 import org.apache.nifi.dbcp.DBCPService;
+import org.apache.nifi.expression.ExpressionLanguageScope;
 import org.apache.nifi.lookup.LookupFailureException;
 import org.apache.nifi.processor.util.StandardValidators;
 import org.apache.nifi.reporting.InitializationException;
@@ -47,7 +48,7 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
                     .description("Lookup value column.")
                     .required(true)
                     .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
-                    .expressionLanguageSupported(true)
+                    .expressionLanguageSupported(ExpressionLanguageScope.FLOWFILE_ATTRIBUTES)
                     .build();
 
     private String lookupValue;
@@ -81,13 +82,13 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
         NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
 
-        for (String column : coordinates.keySet()) {
-            mapSqlParameterSource.addValue(column, coordinates.get(column));
+        for (Map.Entry<String, Object> column : coordinates.entrySet()) {
+            mapSqlParameterSource.addValue(column.getKey(), coordinates.get(column.getKey()));
         }
 
         List<Map<String, Object>> mapList = jdbcTemplate.queryForList(sqlQuery, mapSqlParameterSource);
 
-        if (mapList.size() > 0) {
+        if (!mapList.isEmpty()) {
             Object o = mapList.get(0).get(lookupValue);
             if (o == null) {
                 return Optional.empty();

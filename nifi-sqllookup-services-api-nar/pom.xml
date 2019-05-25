@@ -23,7 +23,7 @@
   <parent>
     <groupId>com.mrcsparker</groupId>
     <artifactId>nifi-sqllookup-services-bundle</artifactId>
-    <version>1.7.1</version>
+    <version>1.9.2</version>
   </parent>
 
   <artifactId>nifi-sqllookup-services-api-nar</artifactId>

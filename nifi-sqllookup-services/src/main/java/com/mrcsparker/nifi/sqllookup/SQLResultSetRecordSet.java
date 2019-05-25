@@ -97,7 +97,6 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
         return value;
     }
 
-    @SuppressWarnings("rawtypes")
     private Object normalizeArrayValue(final Array value) throws SQLException {
         if (value == null) {
             return null;
@@ -120,11 +119,7 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
 
             final int nullableFlag = metadata.isNullable(column);
             final boolean nullable;
-            if (nullableFlag == ResultSetMetaData.columnNoNulls) {
-                nullable = false;
-            } else {
-                nullable = true;
-            }
+            nullable = nullableFlag != ResultSetMetaData.columnNoNulls;
 
             final RecordField field = new RecordField(fieldName, dataType, nullable);
             fields.add(field);
@@ -163,17 +158,20 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
                 }
 
                 final String columnName = rs.getMetaData().getColumnName(columnIndex);
-                Optional<DataType> dataType = readerSchema.getDataType(columnName);
-                if (dataType.isPresent()) {
-                    return dataType.get();
+
+                if (readerSchema != null) {
+                    Optional<DataType> dataType = readerSchema.getDataType(columnName);
+                    if (dataType.isPresent()) {
+                        return dataType.get();
+                    }
                 }
 
                 final Object obj = rs.getObject(columnIndex);
-                if (obj == null || !(obj instanceof Record)) {
+                if (!(obj instanceof Record)) {
                     final List<DataType> dataTypes = Stream.of(RecordFieldType.BIGINT, RecordFieldType.BOOLEAN, RecordFieldType.BYTE, RecordFieldType.CHAR, RecordFieldType.DATE,
                             RecordFieldType.DOUBLE, RecordFieldType.FLOAT, RecordFieldType.INT, RecordFieldType.LONG, RecordFieldType.SHORT, RecordFieldType.STRING, RecordFieldType.TIME,
                             RecordFieldType.TIMESTAMP)
-                            .map(recordFieldType -> recordFieldType.getDataType())
+                            .map(RecordFieldType::getDataType)
                             .collect(Collectors.toList());
 
                     return RecordFieldType.CHOICE.getChoiceDataType(dataTypes);
@@ -185,9 +183,12 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
             }
             default: {
                 final String columnName = rs.getMetaData().getColumnName(columnIndex);
-                Optional<DataType> dataType = readerSchema.getDataType(columnName);
-                if (dataType.isPresent()) {
-                    return dataType.get();
+
+                if (readerSchema != null) {
+                    Optional<DataType> dataType = readerSchema.getDataType(columnName);
+                    if (dataType.isPresent()) {
+                        return dataType.get();
+                    }
                 }
 
                 return getFieldType(sqlType).getDataType();
@@ -215,9 +216,6 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
         if (arrayValue instanceof short[]) {
             return RecordFieldType.SHORT.getDataType();
         }
-        if (arrayValue instanceof byte[]) {
-            return RecordFieldType.BYTE.getDataType();
-        }
         if (arrayValue instanceof float[]) {
             return RecordFieldType.FLOAT.getDataType();
         }
@@ -234,8 +232,8 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
             }
 
             Object valueToLookAt = null;
-            for (int i = 0; i < values.length; i++) {
-                valueToLookAt = values[i];
+            for (Object value : values) {
+                valueToLookAt = value;
                 if (valueToLookAt != null) {
                     break;
                 }
@@ -273,9 +271,6 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
             }
             if (valueToLookAt instanceof BigInteger) {
                 return RecordFieldType.BIGINT.getDataType();
-            }
-            if (valueToLookAt instanceof Integer) {
-                return RecordFieldType.INT.getDataType();
             }
             if (valueToLookAt instanceof java.sql.Time) {
                 return RecordFieldType.TIME.getDataType();

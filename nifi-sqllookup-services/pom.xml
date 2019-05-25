@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.mrcsparker</groupId>
         <artifactId>nifi-sqllookup-services-bundle</artifactId>
-        <version>1.7.1</version>
+        <version>1.9.2</version>
     </parent>
 
     <artifactId>nifi-sqllookup-services</artifactId>
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>com.mrcsparker</groupId>
             <artifactId>nifi-sqllookup-services-api</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.nifi</groupId>
@@ -70,12 +70,12 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
-            <version>5.0.5.RELEASE</version>
+            <version>${spring-jdbc.version}</version>
         </dependency>
         <dependency>
-            <groupId>commons-dbcp</groupId>
-            <artifactId>commons-dbcp</artifactId>
-            <version>1.4</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-dbcp2</artifactId>
+            <version>${commons-dbcp2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.nifi</groupId>
@@ -104,7 +104,7 @@
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
-            <version>2.4.0</version>
+            <version>${hsqldb.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

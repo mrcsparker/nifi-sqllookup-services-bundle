@@ -17,7 +17,7 @@
 package com.mrcsparker.nifi.sqllookup;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.nifi.annotation.documentation.CapabilityDescription;
 import org.apache.nifi.annotation.documentation.Tags;
 import org.apache.nifi.annotation.lifecycle.OnEnabled;
@@ -87,6 +87,23 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
         return Record.class;
     }
 
+    private PreparedStatementCreator setupPreparedStatementCreator(Map<String, Object> coordinates) {
+        final DataSource dataSource = new BasicDataSource() {
+            @Override
+            public Connection getConnection() throws SQLException {
+                return dbcpService.getConnection();
+            }
+        };
+
+        SQLNamedParameterJdbcTemplate jdbcTemplate = new SQLNamedParameterJdbcTemplate(dataSource);
+        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
+
+        for (Map.Entry<String, Object> column : coordinates.entrySet()) {
+            mapSqlParameterSource.addValue(column.getKey(), coordinates.get(column.getKey()));
+        }
+
+        return jdbcTemplate.getPreparedStatement(sqlQuery, mapSqlParameterSource);
+    }
 
     @Override
     Optional<Record> databaseLookup(Map<String, Object> coordinates) throws LookupFailureException {
@@ -96,22 +113,8 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
         return resultRecordSetDatabaseLookup(coordinates);
     }
 
-    Optional<Record> resultRecordSetDatabaseLookup(Map<String, Object> coordinates) throws LookupFailureException {
-        final DataSource dataSource = new BasicDataSource() {
-            @Override
-            public Connection getConnection() throws SQLException {
-                return dbcpService.getConnection();
-            }
-        };
-
-        SQLNamedParameterJdbcTemplate jdbcTemplate = new SQLNamedParameterJdbcTemplate(dataSource);
-        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
-
-        for (String column : coordinates.keySet()) {
-            mapSqlParameterSource.addValue(column, coordinates.get(column));
-        }
-
-        PreparedStatementCreator preparedStatementCreator = jdbcTemplate.getPreparedStatement(sqlQuery, mapSqlParameterSource);
+    private Optional<Record> resultRecordSetDatabaseLookup(Map<String, Object> coordinates) throws LookupFailureException {
+        PreparedStatementCreator preparedStatementCreator = setupPreparedStatementCreator(coordinates);
 
         try (final Connection connection = dbcpService.getConnection();
              final PreparedStatement preparedStatement = preparedStatementCreator.createPreparedStatement(connection)) {
@@ -119,11 +122,12 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
             preparedStatement.setQueryTimeout(queryTimeout);
             preparedStatement.execute();
 
-            final ResultSet resultSet = preparedStatement.getResultSet();
-            final RecordSchema schema = new SimpleRecordSchema(new ArrayList<>());
-            final ResultSetRecordSet resultSetRecordSet = new ResultSetRecordSet(resultSet, schema);
-
-            return Optional.of(resultSetRecordSet.next());
+            try (ResultSet resultSet = preparedStatement.getResultSet()) {
+                final RecordSchema schema = new SimpleRecordSchema(new ArrayList<>());
+                try (ResultSetRecordSet resultSetRecordSet = new ResultSetRecordSet(resultSet, schema)) {
+                    return Optional.of(resultSetRecordSet.next());
+                }
+            }
 
         } catch (final ProcessException | SQLException e) {
             getLogger().error("Error during lookup: {}", new Object[] { coordinates.toString() }, e);
@@ -133,22 +137,8 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
         }
     }
 
-    Optional<Record> jdbcDatabaseLookup(Map<String, Object> coordinates) throws LookupFailureException {
-        final DataSource dataSource = new BasicDataSource() {
-            @Override
-            public Connection getConnection() throws SQLException {
-                return dbcpService.getConnection();
-            }
-        };
-
-        SQLNamedParameterJdbcTemplate jdbcTemplate = new SQLNamedParameterJdbcTemplate(dataSource);
-        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
-
-        for (String column : coordinates.keySet()) {
-            mapSqlParameterSource.addValue(column, coordinates.get(column));
-        }
-
-        PreparedStatementCreator preparedStatementCreator = jdbcTemplate.getPreparedStatement(sqlQuery, mapSqlParameterSource);
+    private Optional<Record> jdbcDatabaseLookup(Map<String, Object> coordinates) throws LookupFailureException {
+        PreparedStatementCreator preparedStatementCreator = setupPreparedStatementCreator(coordinates);
 
         try (final Connection connection = dbcpService.getConnection();
              final PreparedStatement preparedStatement = preparedStatementCreator.createPreparedStatement(connection)) {
@@ -156,12 +146,12 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
             preparedStatement.setQueryTimeout(queryTimeout);
             preparedStatement.execute();
 
-            final ResultSet resultSet = preparedStatement.getResultSet();
-            final RecordSchema schema = new SimpleRecordSchema(new ArrayList<>());
-            final SQLResultSetRecordSet resultSetRecordSet = new SQLResultSetRecordSet(resultSet, schema);
-
-            return Optional.of(resultSetRecordSet.next());
-
+            try (ResultSet resultSet = preparedStatement.getResultSet()) {
+                final RecordSchema schema = new SimpleRecordSchema(new ArrayList<>());
+                try (SQLResultSetRecordSet resultSetRecordSet = new SQLResultSetRecordSet(resultSet, schema)) {
+                    return Optional.of(resultSetRecordSet.next());
+                }
+            }
 
         } catch (final ProcessException | SQLException e) {
             getLogger().error("Error during lookup: {}", new Object[]{coordinates.toString()}, e);
