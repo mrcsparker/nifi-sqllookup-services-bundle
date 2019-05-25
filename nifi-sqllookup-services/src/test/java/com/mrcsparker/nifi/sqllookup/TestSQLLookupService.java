@@ -35,7 +35,7 @@ public class TestSQLLookupService extends AbstractSQLLookupServiceTest {
 
     static final Logger LOG = LoggerFactory.getLogger(TestSQLLookupService.class);
 
-    private DBCPService dbcpService = new DBCPServiceSimpleImpl();
+    private final DBCPService dbcpService = new DBCPServiceSimpleImpl();
     private SQLLookupService sqlLookupService;
 
     @Before

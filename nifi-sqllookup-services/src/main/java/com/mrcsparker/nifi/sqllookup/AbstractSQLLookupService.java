@@ -5,6 +5,7 @@ import org.apache.nifi.annotation.lifecycle.OnDisabled;
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.controller.AbstractControllerService;
 import org.apache.nifi.dbcp.DBCPService;
+import org.apache.nifi.expression.ExpressionLanguageScope;
 import org.apache.nifi.lookup.LookupFailureException;
 import org.apache.nifi.lookup.LookupService;
 import org.apache.nifi.processor.util.StandardValidators;
@@ -32,7 +33,7 @@ abstract class AbstractSQLLookupService<T> extends AbstractControllerService imp
                     .description("SQL Query")
                     .required(true)
                     .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
-                    .expressionLanguageSupported(true)
+                    .expressionLanguageSupported(ExpressionLanguageScope.FLOWFILE_ATTRIBUTES)
                     .build();
 
     static final PropertyDescriptor QUERY_TIMEOUT = new PropertyDescriptor.Builder()
@@ -87,7 +88,7 @@ abstract class AbstractSQLLookupService<T> extends AbstractControllerService imp
         return Collections.emptySet();
     }
 
-    public long getCacheSize() {
+    long getCacheSize() {
         return cache.estimatedSize();
     }
 
