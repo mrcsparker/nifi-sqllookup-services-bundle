@@ -16,14 +16,14 @@
  */
 package com.mrcsparker.nifi.sqllookup;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
+import com.mrcsparker.nifi.sqllookup.cache.Cache2kAdapter;
+import com.mrcsparker.nifi.sqllookup.cache.CaffeineAdapter;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.nifi.annotation.documentation.CapabilityDescription;
 import org.apache.nifi.annotation.documentation.Tags;
 import org.apache.nifi.annotation.lifecycle.OnEnabled;
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.controller.ConfigurationContext;
-import org.apache.nifi.dbcp.DBCPService;
 import org.apache.nifi.lookup.LookupFailureException;
 import org.apache.nifi.processor.exception.ProcessException;
 import org.apache.nifi.processor.util.StandardValidators;
@@ -38,7 +38,6 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 @Tags({"dbcp", "database", "lookup", "record", "sql", "cache"})
 @CapabilityDescription(
@@ -67,6 +66,7 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
         pds.add(CONNECTION_POOL);
         pds.add(SQL_QUERY);
         pds.add(QUERY_TIMEOUT);
+        pds.add(CACHING_LIBRARY);
         pds.add(CACHE_SIZE);
         pds.add(USE_JDBC_TYPES);
         propertyDescriptors = Collections.unmodifiableList(pds);
@@ -165,14 +165,14 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
     protected Optional<Record> cacheLookup(Map<String, Object> coordinates) throws LookupFailureException {
         String cacheKey = sqlQuery + ":" + coordinates.hashCode();
 
-        Record record = cache.getIfPresent(cacheKey);
+        Record record = cache.get(cacheKey);
         if (record != null) {
             return Optional.of(record);
         }
 
         Optional<Record> lookupRecord = databaseLookup(coordinates);
         if (lookupRecord.isPresent()) {
-            cache.put(cacheKey, lookupRecord.get());
+            cache.set(cacheKey, lookupRecord.get());
 
             return lookupRecord;
         }
@@ -182,12 +182,13 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
 
     @OnEnabled
     public void onEnabled(final ConfigurationContext context) {
-        this.dbcpService = context.getProperty(CONNECTION_POOL).asControllerService(DBCPService.class);
-        this.sqlQuery = context.getProperty(SQL_QUERY).evaluateAttributeExpressions().getValue();
-        this.queryTimeout = context.getProperty(QUERY_TIMEOUT).asTimePeriod(TimeUnit.SECONDS).intValue();
-        this.cacheSize = context.getProperty(CACHE_SIZE).asInteger();
+        setDefaultValues(context);
         this.useJDBCTypes = context.getProperty(USE_JDBC_TYPES).asBoolean();
 
-        cache = Caffeine.newBuilder().maximumSize(cacheSize).build();
+        if (cachingLibrary.equals("Caffeine")) {
+            cache = new CaffeineAdapter<>(cacheSize);
+        } else {
+            cache = new Cache2kAdapter<>(cacheSize, Record.class);
+        }
     }
 }

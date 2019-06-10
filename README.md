@@ -24,8 +24,8 @@ These controllers were designed to be flexible and fast. They support:
 ```bash
 > cd nifi-sqllookup-bundle
 > mvn package
-> cp ./nifi-sqllookup-services-nar/target/nifi-sqllookup-services-nar-1.6.0.nar /NIFI_INSTALL/lib/
-> cp ./nifi-sqllookup-services-api-nar/target/nifi-sqllookup-services-api-nar-1.6.0.nar /NIFI_INSTALL/lib/
+> cp ./nifi-sqllookup-services-nar/target/nifi-sqllookup-services-nar-1.9.2.nar /NIFI_INSTALL/lib/
+> cp ./nifi-sqllookup-services-api-nar/target/nifi-sqllookup-services-api-nar-1.9.2.nar /NIFI_INSTALL/lib/
 ```
 
 * Start NiFi
@@ -43,7 +43,3 @@ These controllers were designed to be flexible and fast. They support:
 * [Data flow enrichment with NiFi part 1 : LookupRecord processor](https://community.hortonworks.com/articles/138632/data-flow-enrichment-with-nifi-lookuprecord-proces.html)
 * [Data flow enrichment with NiFi part 2 : LookupAttribute processor](https://community.hortonworks.com/articles/140231/data-flow-enrichment-with-nifi-part-2-lookupattrib.html)
 * [Data flow enrichment with NiFi part 3: LookupRecord with MongoDB](https://community.hortonworks.com/articles/146198/data-flow-enrichment-with-nifi-part-3-lookuprecord.html)
-
-
-
-

@@ -68,6 +68,12 @@
             <version>${caffeine.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.cache2k</groupId>
+            <artifactId>cache2k-base-bom</artifactId>
+            <version>${cache2k.version}</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
             <version>${spring-jdbc.version}</version>

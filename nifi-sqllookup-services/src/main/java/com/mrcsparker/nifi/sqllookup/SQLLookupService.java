@@ -16,12 +16,12 @@
  */
 package com.mrcsparker.nifi.sqllookup;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
+import com.mrcsparker.nifi.sqllookup.cache.Cache2kAdapter;
+import com.mrcsparker.nifi.sqllookup.cache.CaffeineAdapter;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.nifi.annotation.lifecycle.OnEnabled;
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.controller.ConfigurationContext;
-import org.apache.nifi.dbcp.DBCPService;
 import org.apache.nifi.expression.ExpressionLanguageScope;
 import org.apache.nifi.lookup.LookupFailureException;
 import org.apache.nifi.processor.util.StandardValidators;
@@ -35,7 +35,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class SQLLookupService extends AbstractSQLLookupService<String> {
 
@@ -60,6 +59,7 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
         pds.add(CONNECTION_POOL);
         pds.add(SQL_QUERY);
         pds.add(QUERY_TIMEOUT);
+        pds.add(CACHING_LIBRARY);
         pds.add(CACHE_SIZE);
         pds.add(LOOKUP_VALUE_COLUMN);
         propertyDescriptors = Collections.unmodifiableList(pds);
@@ -104,7 +104,7 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
     protected Optional<String> cacheLookup(Map<String, Object> coordinates) throws LookupFailureException {
         String cacheKey = sqlQuery + ":" + coordinates.hashCode();
 
-        String result = cache.getIfPresent(cacheKey);
+        String result = cache.get(cacheKey);
         if (result != null) {
             return Optional.of(result);
         }
@@ -113,7 +113,7 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
         if (lookupRecord.isPresent()) {
             result = lookupRecord.get();
 
-            cache.put(cacheKey, result);
+            cache.set(cacheKey, result);
 
             return lookupRecord;
         }
@@ -128,13 +128,14 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
 
     @OnEnabled
     public void onEnabled(final ConfigurationContext context)  throws InitializationException {
-        this.dbcpService = context.getProperty(CONNECTION_POOL).asControllerService(DBCPService.class);
-        this.sqlQuery = context.getProperty(SQL_QUERY).evaluateAttributeExpressions().getValue();
-        this.queryTimeout = context.getProperty(QUERY_TIMEOUT).asTimePeriod(TimeUnit.SECONDS).intValue();
-        this.cacheSize = context.getProperty(CACHE_SIZE).asInteger();
+        setDefaultValues(context);
         this.lookupValue = context.getProperty(LOOKUP_VALUE_COLUMN).getValue();
 
-        cache = Caffeine.newBuilder().maximumSize(cacheSize).build();
+        if (cachingLibrary.equals("Caffeine")) {
+            cache = new CaffeineAdapter<>(cacheSize);
+        } else {
+            cache = new Cache2kAdapter<>(cacheSize, String.class);
+        }
     }
 
 }
