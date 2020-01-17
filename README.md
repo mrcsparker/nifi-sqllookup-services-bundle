@@ -24,8 +24,8 @@ These controllers were designed to be flexible and fast. They support:
 ```bash
 > cd nifi-sqllookup-bundle
 > mvn package
-> cp ./nifi-sqllookup-services-nar/target/nifi-sqllookup-services-nar-1.9.2.nar /NIFI_INSTALL/lib/
-> cp ./nifi-sqllookup-services-api-nar/target/nifi-sqllookup-services-api-nar-1.9.2.nar /NIFI_INSTALL/lib/
+> cp ./nifi-sqllookup-services-nar/target/nifi-sqllookup-services-nar-1.10.0.nar /NIFI_INSTALL/lib/
+> cp ./nifi-sqllookup-services-api-nar/target/nifi-sqllookup-services-api-nar-1.10.0.nar /NIFI_INSTALL/lib/
 ```
 
 * Start NiFi
