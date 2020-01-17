@@ -27,15 +27,15 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.min-version>3.1.0</maven.min-version>
         <nifi.version>1.10.0</nifi.version>
-        <caffeine.version>2.7.0</caffeine.version>
-        <cache2k.version>1.2.2.Final</cache2k.version>
-        <h2.version>1.4.199</h2.version>
+        <caffeine.version>2.8.1</caffeine.version>
+        <cache2k.version>1.2.4.Final</cache2k.version>
+        <h2.version>1.4.200</h2.version>
         <junit.version>4.12</junit.version>
-        <slf4j.version>1.7.26</slf4j.version>
-        <jacoco.version>0.8.4</jacoco.version>
-        <mockito.version>2.27.0</mockito.version>
-        <commons-dbcp2.version>2.6.0</commons-dbcp2.version>
-        <spring-jdbc.version>5.1.7.RELEASE</spring-jdbc.version>
+        <slf4j.version>1.7.30</slf4j.version>
+        <jacoco.version>0.8.5</jacoco.version>
+        <mockito.version>3.2.4</mockito.version>
+        <commons-dbcp2.version>2.7.0</commons-dbcp2.version>
+        <spring-jdbc.version>5.2.3.RELEASE</spring-jdbc.version>
         <hsqldb.version>2.4.1</hsqldb.version>
     </properties>
 

@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentMap;
 
 public class Cache2kAdapter<T> extends CacheAdapter<T> {
 
-    private Cache<String, T> cache;
+    private final Cache<String, T> cache;
 
     public Cache2kAdapter(Integer cacheSize, Class<T> valueType) {
         cache = Cache2kBuilder.of(String.class, valueType)

@@ -1,8 +1,6 @@
 package com.mrcsparker.nifi.sqllookup;
 
-import com.mrcsparker.nifi.sqllookup.cache.Cache2kAdapter;
 import com.mrcsparker.nifi.sqllookup.cache.CacheAdapter;
-import com.mrcsparker.nifi.sqllookup.cache.CaffeineAdapter;
 import org.apache.nifi.annotation.lifecycle.OnDisabled;
 import org.apache.nifi.components.AllowableValue;
 import org.apache.nifi.components.PropertyDescriptor;
@@ -70,7 +68,7 @@ abstract class AbstractSQLLookupService<T> extends AbstractControllerService imp
             .description("Size of the lookup cache.")
             .defaultValue("0")
             .required(true)
-            .addValidator(StandardValidators.INTEGER_VALIDATOR  )
+            .addValidator(StandardValidators.INTEGER_VALIDATOR)
             .build();
 
     String sqlQuery;

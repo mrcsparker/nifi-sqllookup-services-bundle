@@ -32,79 +32,6 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
         }
     }
 
-    @Override
-    public RecordSchema getSchema() {
-        return schema;
-    }
-
-    @Override
-    public Record next() throws IOException {
-        try {
-            if (moreRows) {
-                final Record record = createRecord(rs);
-                moreRows = rs.next();
-                return record;
-            } else {
-                return null;
-            }
-        } catch (final SQLException e) {
-            throw new IOException("Could not obtain next record from ResultSet", e);
-        }
-    }
-
-    @Override
-    public void close() {
-        try {
-            rs.close();
-        } catch (final SQLException e) {
-            logger.error("Failed to close ResultSet", e);
-        }
-    }
-
-    private Record createRecord(final ResultSet rs) throws SQLException {
-        final Map<String, Object> values = new HashMap<>(schema.getFieldCount());
-
-        for (final RecordField field : schema.getFields()) {
-            final String fieldName = field.getFieldName();
-
-            final Object value;
-            if (rsColumnNames.contains(fieldName)) {
-                if (rs.getObject(fieldName) instanceof java.sql.Array) {
-                    value = normalizeArrayValue(rs.getArray(fieldName));
-                } else {
-                    value = normalizeValue(rs.getObject(fieldName));
-                }
-            } else {
-                value = null;
-            }
-
-            values.put(fieldName, value);
-        }
-
-        return new MapRecord(schema, values);
-    }
-
-    @SuppressWarnings("rawtypes")
-    private Object normalizeValue(final Object value) throws SQLException {
-        if (value == null) {
-            return null;
-        }
-
-        if (value instanceof List) {
-            return ((List) value).toArray();
-        }
-
-        return value;
-    }
-
-    private Object normalizeArrayValue(final Array value) throws SQLException {
-        if (value == null) {
-            return null;
-        }
-
-        return value.getArray();
-    }
-
     private static RecordSchema createSchema(final ResultSet rs, final RecordSchema readerSchema) throws SQLException {
         final ResultSetMetaData metadata = rs.getMetaData();
         final int numCols = metadata.getColumnCount();
@@ -290,7 +217,6 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
         return RecordFieldType.STRING.getDataType();
     }
 
-
     private static RecordFieldType getFieldType(final int sqlType) {
         switch (sqlType) {
             case Types.BIGINT:
@@ -337,5 +263,78 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
         }
 
         return RecordFieldType.STRING;
+    }
+
+    @Override
+    public RecordSchema getSchema() {
+        return schema;
+    }
+
+    @Override
+    public Record next() throws IOException {
+        try {
+            if (moreRows) {
+                final Record record = createRecord(rs);
+                moreRows = rs.next();
+                return record;
+            } else {
+                return null;
+            }
+        } catch (final SQLException e) {
+            throw new IOException("Could not obtain next record from ResultSet", e);
+        }
+    }
+
+    @Override
+    public void close() {
+        try {
+            rs.close();
+        } catch (final SQLException e) {
+            logger.error("Failed to close ResultSet", e);
+        }
+    }
+
+    private Record createRecord(final ResultSet rs) throws SQLException {
+        final Map<String, Object> values = new HashMap<>(schema.getFieldCount());
+
+        for (final RecordField field : schema.getFields()) {
+            final String fieldName = field.getFieldName();
+
+            final Object value;
+            if (rsColumnNames.contains(fieldName)) {
+                if (rs.getObject(fieldName) instanceof java.sql.Array) {
+                    value = normalizeArrayValue(rs.getArray(fieldName));
+                } else {
+                    value = normalizeValue(rs.getObject(fieldName));
+                }
+            } else {
+                value = null;
+            }
+
+            values.put(fieldName, value);
+        }
+
+        return new MapRecord(schema, values);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Object normalizeValue(final Object value) throws SQLException {
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof List) {
+            return ((List) value).toArray();
+        }
+
+        return value;
+    }
+
+    private Object normalizeArrayValue(final Array value) throws SQLException {
+        if (value == null) {
+            return null;
+        }
+
+        return value.getArray();
     }
 }

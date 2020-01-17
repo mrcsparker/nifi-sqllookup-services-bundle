@@ -38,8 +38,6 @@ import java.util.*;
 
 public class SQLLookupService extends AbstractSQLLookupService<String> {
 
-    static final Logger LOG = LoggerFactory.getLogger(SQLLookupService.class);
-
     public static final PropertyDescriptor LOOKUP_VALUE_COLUMN =
             new PropertyDescriptor.Builder()
                     .name("lookup-value-column")
@@ -49,10 +47,9 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
                     .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
                     .expressionLanguageSupported(ExpressionLanguageScope.FLOWFILE_ATTRIBUTES)
                     .build();
-
-    private String lookupValue;
-
+    static final Logger LOG = LoggerFactory.getLogger(SQLLookupService.class);
     private final List<PropertyDescriptor> propertyDescriptors;
+    private String lookupValue;
 
     public SQLLookupService() {
         final List<PropertyDescriptor> pds = new ArrayList<>();
@@ -127,7 +124,7 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
     }
 
     @OnEnabled
-    public void onEnabled(final ConfigurationContext context)  throws InitializationException {
+    public void onEnabled(final ConfigurationContext context) throws InitializationException {
         setDefaultValues(context);
         this.lookupValue = context.getProperty(LOOKUP_VALUE_COLUMN).getValue();
 

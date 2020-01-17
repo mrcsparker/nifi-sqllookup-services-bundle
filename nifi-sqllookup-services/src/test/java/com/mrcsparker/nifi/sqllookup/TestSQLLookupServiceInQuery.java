@@ -43,7 +43,7 @@ public class TestSQLLookupServiceInQuery extends AbstractSQLLookupServiceTest {
 
     @Test
     public void testCorrectKeys() throws Exception {
-        assertEquals(sqlNamedLookupService.getRequiredKeys(), Collections.emptySet());
+        assertEquals(Collections.emptySet(), sqlNamedLookupService.getRequiredKeys());
     }
 
     @Test
@@ -54,7 +54,7 @@ public class TestSQLLookupServiceInQuery extends AbstractSQLLookupServiceTest {
     @Test
     public void testSimpleLookup0() throws Exception {
 
-        List names = Arrays.asList(547897511298456L, 867142279069316L);
+        List<Long> names = Arrays.asList(547897511298456L, 867142279069316L);
         final Optional<String> get1 = sqlNamedLookupService.lookup(Collections.singletonMap("name", names));
         assertTrue(get1.isPresent());
         assertEquals("Consider the Lilies", get1.get());

@@ -63,8 +63,8 @@ public class AbstractSQLLookupServiceTest {
                 "    name VARCHAR(30), " +
                 "    value VARCHAR(255), " +
                 "    period INT DEFAULT 1, " +
-                "    address varchar(255), " +
-                "    price float(52) DEFAULT 0.00 " +
+                "    address VARCHAR(255), " +
+                "    price FLOAT(52) DEFAULT 0.00 " +
                 ")");
 
         stmt.execute("insert into TEST_LOOKUP_DB (name, value, period, address, price) VALUES ('495304346258559', 'Wildfire at Midnight', 7, '94384 Stroman Pike', 48.66)");
@@ -173,9 +173,8 @@ public class AbstractSQLLookupServiceTest {
 
     /**
      * Simple implementation only from ExecuteSQL processor testing.
-     *
      */
-    class DBCPServiceSimpleImpl extends AbstractControllerService implements DBCPService {
+    static class DBCPServiceSimpleImpl extends AbstractControllerService implements DBCPService {
 
         @Override
         public String getIdentifier() {

@@ -28,7 +28,9 @@ import org.apache.nifi.lookup.LookupFailureException;
 import org.apache.nifi.processor.exception.ProcessException;
 import org.apache.nifi.processor.util.StandardValidators;
 import org.apache.nifi.serialization.SimpleRecordSchema;
-import org.apache.nifi.serialization.record.*;
+import org.apache.nifi.serialization.record.Record;
+import org.apache.nifi.serialization.record.RecordSchema;
+import org.apache.nifi.serialization.record.ResultSetRecordSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -36,18 +38,19 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 @Tags({"dbcp", "database", "lookup", "record", "sql", "cache"})
 @CapabilityDescription(
-    "Provides a lookup service based around DBCP."
+        "Provides a lookup service based around DBCP."
 )
 public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
 
     static final Logger LOG = LoggerFactory.getLogger(SQLRecordLookupService.class);
-    private final List<PropertyDescriptor> propertyDescriptors;
-
     static final PropertyDescriptor USE_JDBC_TYPES =
             new PropertyDescriptor.Builder()
                     .name("use-jdbc-types")
@@ -60,6 +63,7 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
                     .required(true)
                     .addValidator(StandardValidators.BOOLEAN_VALIDATOR)
                     .build();
+    private final List<PropertyDescriptor> propertyDescriptors;
 
     public SQLRecordLookupService() {
         final List<PropertyDescriptor> pds = new ArrayList<>();
@@ -130,7 +134,7 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
             }
 
         } catch (final ProcessException | SQLException e) {
-            getLogger().error("Error during lookup: {}", new Object[] { coordinates.toString() }, e);
+            getLogger().error("Error during lookup: {}", new Object[]{coordinates.toString()}, e);
             throw new LookupFailureException(e);
         } catch (final NullPointerException | IOException e) {
             return Optional.empty();

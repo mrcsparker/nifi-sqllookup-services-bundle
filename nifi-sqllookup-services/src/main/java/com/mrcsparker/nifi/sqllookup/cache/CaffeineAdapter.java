@@ -2,13 +2,12 @@ package com.mrcsparker.nifi.sqllookup.cache;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.concurrent.ConcurrentMap;
 
 public class CaffeineAdapter<T> extends CacheAdapter<T> {
 
-    private Cache<String, T> cache;
+    private final Cache<String, T> cache;
 
     public CaffeineAdapter(Integer cacheSize) {
         cache = Caffeine.newBuilder().maximumSize(cacheSize).build();

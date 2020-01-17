@@ -32,8 +32,8 @@ __Second__ compile the code:
 __Third__ add the compiled NiFi nars to your local NiFi install:
 
 ```sh
->> cp ./nifi-sqllookup-services-nar/target/nifi-sqllookup-services-nar-1.6.0.nar /PATH/TO/NIFI/lib
->> cp ./nifi-sqllookup-services-api-nar/target/nifi-sqllookup-services-api-nar-1.6.0.nar /PATH/TO/NIFI/lib
+>> cp ./nifi-sqllookup-services-nar/target/nifi-sqllookup-services-nar-1.10.0.nar /PATH/TO/NIFI/lib
+>> cp ./nifi-sqllookup-services-api-nar/target/nifi-sqllookup-services-api-nar-1.10.0.nar /PATH/TO/NIFI/lib
 ```
 __Finally__ startup NiFi:
 
