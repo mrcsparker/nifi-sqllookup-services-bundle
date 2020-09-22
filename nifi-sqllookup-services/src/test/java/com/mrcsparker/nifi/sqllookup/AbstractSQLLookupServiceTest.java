@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.mrcsparker.nifi.sqllookup;
 
 import org.apache.nifi.controller.AbstractControllerService;
@@ -46,7 +47,6 @@ public class AbstractSQLLookupServiceTest {
             dbLocation.delete();
         }
 
-
         // load test data to database
         final Connection con = ((DBCPService) runner.getControllerService("dbcpService")).getConnection();
         Statement stmt = con.createStatement();
@@ -57,15 +57,13 @@ public class AbstractSQLLookupServiceTest {
             sqle.printStackTrace();
         }
 
-        stmt.execute("CREATE TABLE IF NOT EXISTS TEST_LOOKUP_DB " +
-                "( " +
-                "    id serial not null constraint test_lookup_db_pk primary key, " +
-                "    name VARCHAR(30), " +
-                "    value VARCHAR(255), " +
-                "    period INT DEFAULT 1, " +
-                "    address VARCHAR(255), " +
-                "    price FLOAT(52) DEFAULT 0.00 " +
-                ")");
+        stmt.execute("CREATE TABLE IF NOT EXISTS TEST_LOOKUP_DB (                      "
+                        + "    id serial not null constraint test_lookup_db_pk primary key, "
+                        + "    name VARCHAR(30),                                            "
+                        + "    value VARCHAR(255),                                          "
+                        + "    period INT DEFAULT 1,                                        "
+                        + "    address VARCHAR(255),                                        "
+                        + "    price FLOAT(52) DEFAULT 0.00)                                ");
 
         stmt.execute("insert into TEST_LOOKUP_DB (name, value, period, address, price) VALUES ('495304346258559', 'Wildfire at Midnight', 7, '94384 Stroman Pike', 48.66)");
         stmt.execute("insert into TEST_LOOKUP_DB (name, value, period, address, price) VALUES ('456148015917293', 'The Wealth of Nations', 9, '3743 Amanda Mountain', 359.92)");

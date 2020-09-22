@@ -14,10 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.mrcsparker.nifi.sqllookup;
 
 import com.mrcsparker.nifi.sqllookup.cache.Cache2kAdapter;
 import com.mrcsparker.nifi.sqllookup.cache.CaffeineAdapter;
+import com.mrcsparker.nifi.sqllookup.cache.GuavaAdapter;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.nifi.annotation.lifecycle.OnEnabled;
 import org.apache.nifi.components.PropertyDescriptor;
@@ -39,14 +41,13 @@ import java.util.*;
 public class SQLLookupService extends AbstractSQLLookupService<String> {
 
     public static final PropertyDescriptor LOOKUP_VALUE_COLUMN =
-            new PropertyDescriptor.Builder()
-                    .name("lookup-value-column")
-                    .displayName("Lookup Value Column")
-                    .description("Lookup value column.")
-                    .required(true)
-                    .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
-                    .expressionLanguageSupported(ExpressionLanguageScope.FLOWFILE_ATTRIBUTES)
-                    .build();
+                    new PropertyDescriptor.Builder()
+                                    .name("lookup-value-column")
+                                    .displayName("Lookup Value Column")
+                                    .description("Lookup value column.")
+                                    .required(true).addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
+                                    .expressionLanguageSupported(ExpressionLanguageScope.FLOWFILE_ATTRIBUTES)
+                                    .build();
     static final Logger LOG = LoggerFactory.getLogger(SQLLookupService.class);
     private final List<PropertyDescriptor> propertyDescriptors;
     private String lookupValue;
@@ -70,6 +71,7 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
     @Override
     Optional<String> databaseLookup(Map<String, Object> coordinates) throws LookupFailureException {
         final DataSource dataSource = new BasicDataSource() {
+
             @Override
             public Connection getConnection() throws SQLException {
                 return dbcpService.getConnection();
@@ -130,8 +132,10 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
 
         if (cachingLibrary.equals("Caffeine")) {
             cache = new CaffeineAdapter<>(cacheSize);
-        } else {
+        } else if (cachingLibrary.equals("Cache2k")) {
             cache = new Cache2kAdapter<>(cacheSize, String.class);
+        } else {
+            cache = new GuavaAdapter<>(cacheSize);
         }
     }
 

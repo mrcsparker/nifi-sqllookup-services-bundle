@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.mrcsparker.nifi.sqllookup;
 
 import org.apache.nifi.components.PropertyDescriptor;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 class TestProcessor extends AbstractProcessor {
+
     @Override
     public void onTrigger(ProcessContext context, ProcessSession session) throws ProcessException {
     }
@@ -34,12 +36,9 @@ class TestProcessor extends AbstractProcessor {
     @Override
     protected List<PropertyDescriptor> getSupportedPropertyDescriptors() {
         List<PropertyDescriptor> properties = new ArrayList<>();
-        properties.add(new PropertyDescriptor.Builder()
-                .name("LookupService test processor")
-                .description("LookupService test processor")
-                .identifiesControllerService(LookupService.class)
-                .required(true)
-                .build());
+        properties.add(new PropertyDescriptor.Builder().name("LookupService test processor")
+                        .description("LookupService test processor").identifiesControllerService(LookupService.class)
+                        .required(true).build());
         return properties;
     }
 }

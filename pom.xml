@@ -19,30 +19,31 @@
     <parent>
         <groupId>org.apache.nifi</groupId>
         <artifactId>nifi-nar-bundles</artifactId>
-        <version>1.10.0</version>
+        <version>1.12.0</version>
     </parent>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.min-version>3.1.0</maven.min-version>
-        <nifi.version>1.10.0</nifi.version>
-        <caffeine.version>2.8.1</caffeine.version>
-        <cache2k.version>1.2.4.Final</cache2k.version>
+        <nifi.version>1.12.0</nifi.version>
+        <caffeine.version>2.8.5</caffeine.version>
+        <cache2k.version>1.4.0.Final</cache2k.version>
+        <guava.version>28.0-jre</guava.version>
         <h2.version>1.4.200</h2.version>
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13</junit.version>
         <slf4j.version>1.7.30</slf4j.version>
-        <jacoco.version>0.8.5</jacoco.version>
-        <mockito.version>3.2.4</mockito.version>
+        <jacoco.version>0.8.6</jacoco.version>
+        <mockito.version>3.5.11</mockito.version>
         <commons-dbcp2.version>2.7.0</commons-dbcp2.version>
-        <spring-jdbc.version>5.2.3.RELEASE</spring-jdbc.version>
-        <hsqldb.version>2.4.1</hsqldb.version>
+        <spring-jdbc.version>5.2.9.RELEASE</spring-jdbc.version>
+        <hsqldb.version>2.5.1</hsqldb.version>
     </properties>
 
     <groupId>com.mrcsparker</groupId>
     <artifactId>nifi-sqllookup-services-bundle</artifactId>
     <packaging>pom</packaging>
-    <version>1.10.0</version>
+    <version>1.12.0</version>
 
     <modules>
         <module>nifi-sqllookup-services</module>

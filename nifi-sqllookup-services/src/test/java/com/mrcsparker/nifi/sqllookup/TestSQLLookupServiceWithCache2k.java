@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.mrcsparker.nifi.sqllookup;
 
 import org.apache.nifi.dbcp.DBCPService;
@@ -29,6 +30,7 @@ import java.util.Optional;
 import static org.junit.Assert.*;
 
 public class TestSQLLookupServiceWithCache2k extends AbstractSQLLookupServiceTest {
+
     private SQLLookupService sqlLookupService;
 
     @Before
@@ -47,9 +49,11 @@ public class TestSQLLookupServiceWithCache2k extends AbstractSQLLookupServiceTes
         sqlLookupService = new SQLLookupService();
         runner.addControllerService("SQLRecordLookupService", sqlLookupService);
         runner.setProperty(sqlLookupService, SQLLookupService.CONNECTION_POOL, "dbcpService");
-        runner.setProperty(sqlLookupService, SQLLookupService.SQL_QUERY, "SELECT * FROM TEST_LOOKUP_DB WHERE name = :name");
+        runner.setProperty(sqlLookupService, SQLLookupService.SQL_QUERY,
+                        "SELECT * FROM TEST_LOOKUP_DB WHERE name = :name");
         runner.setProperty(sqlLookupService, SQLLookupService.LOOKUP_VALUE_COLUMN, "VALUE");
-        runner.setProperty(sqlLookupService, SQLLookupService.CACHING_LIBRARY, SQLLookupService.CACHING_LIBRARY_CACHE2k);
+        runner.setProperty(sqlLookupService, SQLLookupService.CACHING_LIBRARY,
+                        SQLLookupService.CACHING_LIBRARY_CACHE2k);
         runner.setProperty(sqlLookupService, SQLLookupService.CACHE_SIZE, "10");
         runner.enableControllerService(dbcpService);
         runner.enableControllerService(sqlLookupService);
@@ -125,6 +129,5 @@ public class TestSQLLookupServiceWithCache2k extends AbstractSQLLookupServiceTes
         key = sqlLookupService.lookup(Collections.singletonMap("name", "is-a-null"));
         assertFalse(key.isPresent());
     }
-
 
 }

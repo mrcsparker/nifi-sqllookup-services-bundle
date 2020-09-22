@@ -1,16 +1,16 @@
 package com.mrcsparker.nifi.sqllookup.cache;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 import java.util.concurrent.ConcurrentMap;
 
-public class CaffeineAdapter<T> implements CacheAdapter<T> {
+public class GuavaAdapter<T> implements CacheAdapter<T> {
 
-    private final Cache<String, T> cache;
+    Cache<String, T> cache;
 
-    public CaffeineAdapter(Integer cacheSize) {
-        cache = Caffeine.newBuilder().maximumSize(cacheSize).build();
+    public GuavaAdapter(Integer cacheSize) {
+        cache = CacheBuilder.newBuilder().maximumSize(cacheSize).build();
     }
 
     @Override
@@ -30,7 +30,7 @@ public class CaffeineAdapter<T> implements CacheAdapter<T> {
 
     @Override
     public long estimatedSize() {
-        return cache.estimatedSize();
+        return cache.size();
     }
 
     @Override

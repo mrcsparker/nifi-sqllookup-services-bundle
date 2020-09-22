@@ -2,16 +2,17 @@ package com.mrcsparker.nifi.sqllookup.cache;
 
 import java.util.concurrent.ConcurrentMap;
 
-public abstract class CacheAdapter<T> {
-    public abstract T get(String key);
+public interface CacheAdapter<T> {
 
-    public abstract void set(String key, T value);
+    T get(String key);
 
-    public abstract void delete(String key);
+    void set(String key, T value);
 
-    public abstract long estimatedSize();
+    void delete(String key);
 
-    public abstract ConcurrentMap<String, T> asMap();
+    long estimatedSize();
 
-    public abstract void cleanUp();
+    ConcurrentMap<String, T> asMap();
+
+    void cleanUp();
 }
