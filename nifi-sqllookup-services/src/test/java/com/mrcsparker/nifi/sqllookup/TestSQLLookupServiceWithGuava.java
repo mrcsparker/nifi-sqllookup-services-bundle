@@ -29,7 +29,7 @@ import java.util.Optional;
 
 import static org.junit.Assert.*;
 
-public class TestSQLLookupServiceWithCache extends AbstractSQLLookupServiceTest {
+public class TestSQLLookupServiceWithGuava extends AbstractSQLLookupServiceTest {
 
     private SQLLookupService sqlLookupService;
 
@@ -51,7 +51,11 @@ public class TestSQLLookupServiceWithCache extends AbstractSQLLookupServiceTest 
         runner.setProperty(sqlLookupService, SQLLookupService.CONNECTION_POOL, "dbcpService");
         runner.setProperty(sqlLookupService, SQLLookupService.SQL_QUERY,
                         "SELECT * FROM TEST_LOOKUP_DB WHERE name = :name");
+        runner.setProperty(sqlLookupService, SQLRecordLookupService.CACHING_LIBRARY,
+                        SQLRecordLookupService.CACHING_LIBRARY_GUAVA);
         runner.setProperty(sqlLookupService, SQLLookupService.LOOKUP_VALUE_COLUMN, "VALUE");
+        runner.setProperty(sqlLookupService, SQLLookupService.CACHING_LIBRARY,
+                        SQLLookupService.CACHING_LIBRARY_CACHE2k);
         runner.setProperty(sqlLookupService, SQLLookupService.CACHE_SIZE, "10");
         runner.enableControllerService(dbcpService);
         runner.enableControllerService(sqlLookupService);

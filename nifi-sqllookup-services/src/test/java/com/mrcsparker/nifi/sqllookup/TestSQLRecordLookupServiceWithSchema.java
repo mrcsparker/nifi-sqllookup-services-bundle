@@ -31,18 +31,22 @@ public class TestSQLRecordLookupServiceWithSchema extends AbstractSQLLookupServi
         runner = TestRunners.newTestRunner(LookupRecord.class);
         runner.setProperty("period", "/period");
 
-        final String inputSchemaText = new String(Files.readAllBytes(Paths.get("src/test/resources/period-names.avsc")));
+        final String inputSchemaText = new String(
+                        Files.readAllBytes(Paths.get("src/test/resources/period-names.avsc")));
         JsonTreeReader recordReader = new JsonTreeReader();
         runner.addControllerService("reader", recordReader);
-        runner.setProperty(recordReader, SchemaAccessUtils.SCHEMA_ACCESS_STRATEGY, SchemaAccessUtils.SCHEMA_TEXT_PROPERTY);
+        runner.setProperty(recordReader, SchemaAccessUtils.SCHEMA_ACCESS_STRATEGY,
+                        SchemaAccessUtils.SCHEMA_TEXT_PROPERTY);
         runner.setProperty(recordReader, SchemaAccessUtils.SCHEMA_TEXT, inputSchemaText);
         runner.assertValid(recordReader);
         runner.enableControllerService(recordReader);
 
-        final String outputSchemaText = new String(Files.readAllBytes(Paths.get("src/test/resources/period-names.avsc")));
+        final String outputSchemaText = new String(
+                        Files.readAllBytes(Paths.get("src/test/resources/period-names.avsc")));
         JsonRecordSetWriter recordWriter = new JsonRecordSetWriter();
         runner.addControllerService("writer", recordWriter);
-        runner.setProperty(recordWriter, SchemaAccessUtils.SCHEMA_ACCESS_STRATEGY, SchemaAccessUtils.SCHEMA_TEXT_PROPERTY);
+        runner.setProperty(recordWriter, SchemaAccessUtils.SCHEMA_ACCESS_STRATEGY,
+                        SchemaAccessUtils.SCHEMA_TEXT_PROPERTY);
         runner.setProperty(recordWriter, SchemaAccessUtils.SCHEMA_TEXT, outputSchemaText);
         runner.setProperty(recordWriter, "Pretty Print JSON", "true");
         runner.setProperty(recordWriter, "Schema Write Strategy", "full-schema-attribute");
@@ -61,7 +65,8 @@ public class TestSQLRecordLookupServiceWithSchema extends AbstractSQLLookupServi
         sqlRecordLookupService = new SQLRecordLookupService();
         runner.addControllerService("SQLRecordLookupService", sqlRecordLookupService);
         runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.CONNECTION_POOL, "dbcpService");
-        runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.SQL_QUERY, "SELECT array_agg(VALUE ORDER BY NAME DESC) AS names FROM TEST_LOOKUP_DB WHERE PERIOD IN(:period)");
+        runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.SQL_QUERY,
+                        "SELECT array_agg(VALUE ORDER BY NAME DESC) AS names FROM TEST_LOOKUP_DB WHERE PERIOD IN(:period)");
         runner.assertValid(sqlRecordLookupService);
         runner.enableControllerService(sqlRecordLookupService);
 
@@ -70,7 +75,7 @@ public class TestSQLRecordLookupServiceWithSchema extends AbstractSQLLookupServi
 
     @Test
     public void testCorrectKeys() throws Exception {
-        assertEquals(sqlRecordLookupService.getRequiredKeys(), Collections.emptySet());
+        assertEquals(Collections.emptySet(), sqlRecordLookupService.getRequiredKeys());
     }
 
     @Test

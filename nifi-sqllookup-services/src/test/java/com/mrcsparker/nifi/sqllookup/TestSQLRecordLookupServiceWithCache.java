@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.mrcsparker.nifi.sqllookup;
 
 import org.apache.nifi.dbcp.DBCPService;
@@ -50,7 +51,8 @@ public class TestSQLRecordLookupServiceWithCache extends AbstractSQLLookupServic
         sqlRecordLookupService = new SQLRecordLookupService();
         runner.addControllerService("SQLRecordLookupService", sqlRecordLookupService);
         runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.CONNECTION_POOL, "dbcpService");
-        runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.SQL_QUERY, "SELECT * FROM TEST_LOOKUP_DB WHERE name = :name");
+        runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.SQL_QUERY,
+                        "SELECT * FROM TEST_LOOKUP_DB WHERE name = :name");
         runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.CACHE_SIZE, "10");
 
         runner.enableControllerService(dbcpService);
@@ -65,7 +67,8 @@ public class TestSQLRecordLookupServiceWithCache extends AbstractSQLLookupServic
         assertEquals(sqlRecordLookupService.getCacheSize(), 0);
 
         for (int i = 0; i <= 10; i++) {
-            final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("name", "458006613841984"));
+            final Optional<Record> get1 = sqlRecordLookupService
+                            .lookup(Collections.singletonMap("name", "458006613841984"));
             assertTrue(get1.isPresent());
             assertEquals("458006613841984", get1.get().getAsString("NAME"));
             assertEquals("The Glory and the Dream", get1.get().getAsString("VALUE"));
@@ -118,6 +121,5 @@ public class TestSQLRecordLookupServiceWithCache extends AbstractSQLLookupServic
         sqlRecordLookupService.lookup(Collections.singletonMap("name", "990409804141864"));
         assertEquals(sqlRecordLookupService.getCacheSize(), 10);
     }
-
 
 }

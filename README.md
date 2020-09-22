@@ -2,37 +2,73 @@
 
 [![Build Status](https://travis-ci.org/mrcsparker/nifi-sqllookup-services-bundle.svg?branch=master)](https://travis-ci.org/mrcsparker/nifi-sqllookup-services-bundle)
 
-[![Download](https://api.bintray.com/packages/mrcsparker/maven/nifi-sqllookup-services-bundle/images/download.svg)](https://bintray.com/mrcsparker/maven/nifi-sqllookup-services-bundle/_latestVersion)
+<!-- TOC -->
 
-**NiFI SQL Lookup Service** is a SQL-based lookup service. It allows you to enrich your flowfiles with any jdbc-compliant data store.
+- [Apache NiFi SQL Lookup Service](#apache-nifi-sql-lookup-service)
+  - [About](#about)
+  - [Simple Setup](#simple-setup)
+  - [SQL Query Support](#sql-query-support)
+  - [Caching](#caching)
+    - [Supported caches](#supported-caches)
+  - [Latest release](#latest-release)
+  - [Articles on using NiFi lookup services](#articles-on-using-nifi-lookup-services)
 
-It includes LookupRecord and LookupAttribute controllers.
+<!-- /TOC -->
 
-These controllers were designed to be flexible and fast. They support:
+## About
 
-* _Named Parameters_: `SELECT name FROM foo WHERE value = :value`
-* _SQL IN queries_: `SELECT name FROM foo WHERE value IN(:values)`
-* _Multiple lookup values_: `SELECT name FROM foo WHERE value IN(:values) AND sequence = :sequence AND catalog = :catalog`
-* _Caching_: LookupRecord and LookupAttribute both keep a cache of the most accessed objects. This is configurable in the controller settings.
+**NiFI SQL Lookup Service** is a SQL-based lookup service for [Apache NiFi](https://nifi.apache.org). It allows you to enrich your flowfiles with any jdbc-compliant data store, including:
+
+- PostgreSQL
+- Oracle
+- MySQL
+- MS SQL Server
+- SQLite
+- ... and many more
+
+It includes both [LookupRecord](http://nifi.apache.org/docs/nifi-docs/components/org.apache.nifi/nifi-standard-nar/1.6.0/org.apache.nifi.processors.standard.LookupRecord/) and [LookupAttribute](https://nifi.apache.org/docs/nifi-docs/components/org.apache.nifi/nifi-standard-nar/1.6.0/org.apache.nifi.processors.standard.LookupAttribute/) controllers.
+
+These controllers were designed to be _flexible_ and _fast_.
 
 ## Simple Setup
 
-* [Download Apache NiFi](https://nifi.apache.org/download.html)
-
-* Compile and install `nifi-sqllookup-bundle`
+- [Download Apache NiFi](https://nifi.apache.org/download.html)
+- Compile and install `nifi-sqllookup-bundle`
 
 ```bash
 > cd nifi-sqllookup-bundle
 > mvn package
-> cp ./nifi-sqllookup-services-nar/target/nifi-sqllookup-services-nar-1.10.0.nar /NIFI_INSTALL/lib/
-> cp ./nifi-sqllookup-services-api-nar/target/nifi-sqllookup-services-api-nar-1.10.0.nar /NIFI_INSTALL/lib/
+> cp ./nifi-sqllookup-services-nar/target/nifi-sqllookup-services-nar-1.12.0.nar /NIFI_INSTALL/lib/
+> cp ./nifi-sqllookup-services-api-nar/target/nifi-sqllookup-services-api-nar-1.12.0.nar /NIFI_INSTALL/lib/
 ```
 
-* Start NiFi
+- Start NiFi
 
-## Full Documentation
+## SQL Query Support
 
-[https://mrcsparker.github.io/nifi-sqllookup-services-bundle](https://mrcsparker.github.io/nifi-sqllookup-services-bundle)
+This service supports multiple query types:
+
+- _Named Parameters_: `SELECT name FROM foo WHERE value = :value`
+- _SQL IN queries_: `SELECT name FROM foo WHERE value IN(:values)`
+- _Multiple lookup values_: `SELECT name FROM foo WHERE value IN(:values) AND sequence = :sequence AND catalog = :catalog`
+
+## Caching
+
+The goal of this service is to return values quickly. It has a built-in cache so that your database doesn't get overwhelmed.
+
+This is configurable in the controller settings.
+
+### Supported caches
+
+These caches are all built-in to this service. Select your preferable cache in the controller settings.
+
+- [Caffeine](https://github.com/ben-manes/caffeine) - default cache.
+- [Cache2k](https://cache2k.org)
+- [Guava](https://github.com/google/guava/wiki/CachesExplained)
+
+You can also select the number of items that you want to cache. The caches all keep the most accessed items available by default.
+
+If you don't know which to choose, just go with the default.
 
 ## Latest release
 

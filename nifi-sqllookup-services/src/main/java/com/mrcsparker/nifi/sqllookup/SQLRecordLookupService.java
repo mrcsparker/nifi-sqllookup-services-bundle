@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.mrcsparker.nifi.sqllookup;
 
 import com.mrcsparker.nifi.sqllookup.cache.Cache2kAdapter;
@@ -44,25 +45,24 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-@Tags({"dbcp", "database", "lookup", "record", "sql", "cache"})
-@CapabilityDescription(
-        "Provides a lookup service based around DBCP."
-)
+@Tags({ "dbcp", "database", "lookup", "record", "sql", "cache" })
+@CapabilityDescription("Provides a lookup service based around DBCP.")
 public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
 
     static final Logger LOG = LoggerFactory.getLogger(SQLRecordLookupService.class);
     static final PropertyDescriptor USE_JDBC_TYPES =
-            new PropertyDescriptor.Builder()
-                    .name("use-jdbc-types")
-                    .displayName("Use JDBC types")
-                    .description("Use Built-in JDBC to Record type conversion.\n" +
-                            "If this is not selected it will use the NIFI ResultRecordSet to convert into a Record.\n" +
-                            "Use this if you are returning array types from a SQL query.")
-                    .defaultValue("false")
-                    .allowableValues("true", "false")
-                    .required(true)
-                    .addValidator(StandardValidators.BOOLEAN_VALIDATOR)
-                    .build();
+                    new PropertyDescriptor.Builder()
+                                    .name("use-jdbc-types")
+                                    .displayName("Use JDBC types")
+                                    .description("Use Built-in JDBC to Record type conversion.\n" +
+                                                    "If this is not selected it will use the NIFI ResultRecordSet to convert into a Record.\n" +
+                                                    "Use this if you are returning array types from a SQL query.")
+                                    .defaultValue("false")
+                                    .allowableValues("true", "false")
+                                    .required(true)
+                                    .addValidator(StandardValidators.BOOLEAN_VALIDATOR)
+                                    .build();
+
     private final List<PropertyDescriptor> propertyDescriptors;
 
     public SQLRecordLookupService() {
@@ -93,6 +93,7 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
 
     private PreparedStatementCreator setupPreparedStatementCreator(Map<String, Object> coordinates) {
         final DataSource dataSource = new BasicDataSource() {
+
             @Override
             public Connection getConnection() throws SQLException {
                 return dbcpService.getConnection();
@@ -111,17 +112,19 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
 
     @Override
     Optional<Record> databaseLookup(Map<String, Object> coordinates) throws LookupFailureException {
-        if (useJDBCTypes) {
+        if (Boolean.TRUE.equals(useJDBCTypes)) {
             return jdbcDatabaseLookup(coordinates);
         }
         return resultRecordSetDatabaseLookup(coordinates);
     }
 
-    private Optional<Record> resultRecordSetDatabaseLookup(Map<String, Object> coordinates) throws LookupFailureException {
+    private Optional<Record> resultRecordSetDatabaseLookup(Map<String, Object> coordinates)
+                    throws LookupFailureException {
         PreparedStatementCreator preparedStatementCreator = setupPreparedStatementCreator(coordinates);
 
-        try (final Connection connection = dbcpService.getConnection();
-             final PreparedStatement preparedStatement = preparedStatementCreator.createPreparedStatement(connection)) {
+        try (final Connection connection = dbcpService
+                        .getConnection(); final PreparedStatement preparedStatement = preparedStatementCreator
+                        .createPreparedStatement(connection)) {
 
             preparedStatement.setQueryTimeout(queryTimeout);
             preparedStatement.execute();
@@ -134,7 +137,7 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
             }
 
         } catch (final ProcessException | SQLException e) {
-            getLogger().error("Error during lookup: {}", new Object[]{coordinates.toString()}, e);
+            getLogger().error("Error during lookup: {}", new Object[] { coordinates.toString() }, e);
             throw new LookupFailureException(e);
         } catch (final NullPointerException | IOException e) {
             return Optional.empty();
@@ -144,8 +147,9 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
     private Optional<Record> jdbcDatabaseLookup(Map<String, Object> coordinates) throws LookupFailureException {
         PreparedStatementCreator preparedStatementCreator = setupPreparedStatementCreator(coordinates);
 
-        try (final Connection connection = dbcpService.getConnection();
-             final PreparedStatement preparedStatement = preparedStatementCreator.createPreparedStatement(connection)) {
+        try (final Connection connection = dbcpService
+                        .getConnection(); final PreparedStatement preparedStatement = preparedStatementCreator
+                        .createPreparedStatement(connection)) {
 
             preparedStatement.setQueryTimeout(queryTimeout);
             preparedStatement.execute();
@@ -158,7 +162,7 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
             }
 
         } catch (final ProcessException | SQLException e) {
-            getLogger().error("Error during lookup: {}", new Object[]{coordinates.toString()}, e);
+            getLogger().error("Error during lookup: {}", new Object[] { coordinates.toString() }, e);
             throw new LookupFailureException(e);
         } catch (final NullPointerException | IOException e) {
             return Optional.empty();

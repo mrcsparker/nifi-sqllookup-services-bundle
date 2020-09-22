@@ -13,6 +13,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TestSQLLookupServiceInQuery extends AbstractSQLLookupServiceTest {
+
     static final Logger LOG = LoggerFactory.getLogger(TestSQLLookupService.class);
 
     private SQLLookupService sqlNamedLookupService;
@@ -33,7 +34,8 @@ public class TestSQLLookupServiceInQuery extends AbstractSQLLookupServiceTest {
         sqlNamedLookupService = new SQLLookupService();
         runner.addControllerService("SQLRecordLookupService", sqlNamedLookupService);
         runner.setProperty(sqlNamedLookupService, SQLLookupService.CONNECTION_POOL, "dbcpService");
-        runner.setProperty(sqlNamedLookupService, SQLLookupService.SQL_QUERY, "SELECT * FROM TEST_LOOKUP_DB WHERE name IN (:name) ORDER BY name ASC");
+        runner.setProperty(sqlNamedLookupService, SQLLookupService.SQL_QUERY,
+                        "SELECT * FROM TEST_LOOKUP_DB WHERE name IN (:name) ORDER BY name ASC");
         runner.setProperty(sqlNamedLookupService, SQLLookupService.LOOKUP_VALUE_COLUMN, "VALUE");
         runner.enableControllerService(dbcpService);
         runner.enableControllerService(sqlNamedLookupService);

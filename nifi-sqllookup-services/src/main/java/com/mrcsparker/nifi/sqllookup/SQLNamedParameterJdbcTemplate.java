@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import javax.sql.DataSource;
 
 public class SQLNamedParameterJdbcTemplate extends NamedParameterJdbcTemplate {
+
     public SQLNamedParameterJdbcTemplate(DataSource dataSource) {
         super(dataSource);
     }

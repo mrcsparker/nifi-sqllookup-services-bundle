@@ -5,13 +5,12 @@ import org.cache2k.Cache2kBuilder;
 
 import java.util.concurrent.ConcurrentMap;
 
-public class Cache2kAdapter<T> extends CacheAdapter<T> {
+public class Cache2kAdapter<T> implements CacheAdapter<T> {
 
     private final Cache<String, T> cache;
 
     public Cache2kAdapter(Integer cacheSize, Class<T> valueType) {
-        cache = Cache2kBuilder.of(String.class, valueType)
-                .entryCapacity(cacheSize).build();
+        cache = Cache2kBuilder.of(String.class, valueType).entryCapacity(cacheSize).build();
     }
 
     @Override

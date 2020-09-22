@@ -7,14 +7,26 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.*;
+import java.util.Date;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SQLResultSetRecordSet implements RecordSet, Closeable {
+
     private static final Logger logger = LoggerFactory.getLogger(SQLResultSetRecordSet.class);
+
+    private static final String STRING_CLASS_NAME = String.class.getName();
+    private static final String INT_CLASS_NAME = Integer.class.getName();
+    private static final String LONG_CLASS_NAME = Long.class.getName();
+    private static final String DATE_CLASS_NAME = Date.class.getName();
+    private static final String DOUBLE_CLASS_NAME = Double.class.getName();
+    private static final String FLOAT_CLASS_NAME = Float.class.getName();
+    private static final String BIGDECIMAL_CLASS_NAME = BigDecimal.class.getName();
+
     private final ResultSet rs;
     private final RecordSchema schema;
     private final Set<String> rsColumnNames;
@@ -55,7 +67,8 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
         return new SimpleRecordSchema(fields);
     }
 
-    private static DataType getDataType(final int sqlType, final ResultSet rs, final int columnIndex, final RecordSchema readerSchema) throws SQLException {
+    private static DataType getDataType(final int sqlType, final ResultSet rs, final int columnIndex,
+                    final RecordSchema readerSchema) throws SQLException {
         switch (sqlType) {
             case Types.ARRAY:
                 // The JDBC API does not allow us to know what the base type of an array is through the metadata.
@@ -78,6 +91,10 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
             case Types.LONGVARBINARY:
             case Types.VARBINARY:
                 return RecordFieldType.ARRAY.getArrayDataType(RecordFieldType.BYTE.getDataType());
+            case Types.NUMERIC:
+            case Types.DECIMAL:
+                return RecordFieldType.DECIMAL.getDecimalDataType(rs.getMetaData().getPrecision(columnIndex),
+                                rs.getMetaData().getScale(columnIndex));
             case Types.OTHER: {
                 // If we have no records to inspect, we can't really know its schema so we simply use the default data type.
                 if (rs.isAfterLast()) {
@@ -95,11 +112,13 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
 
                 final Object obj = rs.getObject(columnIndex);
                 if (!(obj instanceof Record)) {
-                    final List<DataType> dataTypes = Stream.of(RecordFieldType.BIGINT, RecordFieldType.BOOLEAN, RecordFieldType.BYTE, RecordFieldType.CHAR, RecordFieldType.DATE,
-                            RecordFieldType.DOUBLE, RecordFieldType.FLOAT, RecordFieldType.INT, RecordFieldType.LONG, RecordFieldType.SHORT, RecordFieldType.STRING, RecordFieldType.TIME,
-                            RecordFieldType.TIMESTAMP)
-                            .map(RecordFieldType::getDataType)
-                            .collect(Collectors.toList());
+                    final List<DataType> dataTypes = Stream
+                                    .of(RecordFieldType.BIGINT, RecordFieldType.BOOLEAN, RecordFieldType.BYTE,
+                                                    RecordFieldType.CHAR, RecordFieldType.DATE, RecordFieldType.DECIMAL,
+                                                    RecordFieldType.DOUBLE, RecordFieldType.FLOAT, RecordFieldType.INT,
+                                                    RecordFieldType.LONG, RecordFieldType.SHORT, RecordFieldType.STRING,
+                                                    RecordFieldType.TIME, RecordFieldType.TIMESTAMP)
+                                    .map(RecordFieldType::getDataType).collect(Collectors.toList());
 
                     return RecordFieldType.CHOICE.getChoiceDataType(dataTypes);
                 }
@@ -118,7 +137,15 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
                     }
                 }
 
-                return getFieldType(sqlType).getDataType();
+                final RecordFieldType fieldType = getFieldType(sqlType,
+                                rs.getMetaData().getColumnClassName(columnIndex));
+
+                if (RecordFieldType.DECIMAL.equals(fieldType)) {
+                    final BigDecimal bigDecimalValue = rs.getBigDecimal(columnIndex);
+                    return fieldType.getDecimalDataType(bigDecimalValue.precision(), bigDecimalValue.scale());
+                } else {
+                    return fieldType.getDataType();
+                }
             }
         }
     }
@@ -128,6 +155,7 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
         if (arrayValue == null) {
             return RecordFieldType.STRING.getDataType();
         }
+
         if (arrayValue instanceof byte[]) {
             return RecordFieldType.BYTE.getDataType();
         }
@@ -142,6 +170,9 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
         }
         if (arrayValue instanceof short[]) {
             return RecordFieldType.SHORT.getDataType();
+        }
+        if (arrayValue instanceof byte[]) {
+            return RecordFieldType.BYTE.getDataType();
         }
         if (arrayValue instanceof float[]) {
             return RecordFieldType.FLOAT.getDataType();
@@ -190,6 +221,10 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
             if (valueToLookAt instanceof Double) {
                 return RecordFieldType.DOUBLE.getDataType();
             }
+            if (valueToLookAt instanceof BigDecimal) {
+                final BigDecimal bigDecimal = (BigDecimal) valueToLookAt;
+                return RecordFieldType.DECIMAL.getDecimalDataType(bigDecimal.precision(), bigDecimal.scale());
+            }
             if (valueToLookAt instanceof Boolean) {
                 return RecordFieldType.BOOLEAN.getDataType();
             }
@@ -198,6 +233,9 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
             }
             if (valueToLookAt instanceof BigInteger) {
                 return RecordFieldType.BIGINT.getDataType();
+            }
+            if (valueToLookAt instanceof Integer) {
+                return RecordFieldType.INT.getDataType();
             }
             if (valueToLookAt instanceof java.sql.Time) {
                 return RecordFieldType.TIME.getDataType();
@@ -217,7 +255,7 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
         return RecordFieldType.STRING.getDataType();
     }
 
-    private static RecordFieldType getFieldType(final int sqlType) {
+    private static RecordFieldType getFieldType(final int sqlType, final String valueClassName) {
         switch (sqlType) {
             case Types.BIGINT:
             case Types.ROWID:
@@ -229,9 +267,10 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
                 return RecordFieldType.CHAR;
             case Types.DATE:
                 return RecordFieldType.DATE;
-            case Types.DECIMAL:
-            case Types.DOUBLE:
             case Types.NUMERIC:
+            case Types.DECIMAL:
+                return RecordFieldType.DECIMAL;
+            case Types.DOUBLE:
             case Types.REAL:
                 return RecordFieldType.DOUBLE;
             case Types.FLOAT:
@@ -251,6 +290,28 @@ public class SQLResultSetRecordSet implements RecordSet, Closeable {
                 return RecordFieldType.STRING;
             case Types.OTHER:
             case Types.JAVA_OBJECT:
+                if (STRING_CLASS_NAME.equals(valueClassName)) {
+                    return RecordFieldType.STRING;
+                }
+                if (INT_CLASS_NAME.equals(valueClassName)) {
+                    return RecordFieldType.INT;
+                }
+                if (LONG_CLASS_NAME.equals(valueClassName)) {
+                    return RecordFieldType.LONG;
+                }
+                if (DATE_CLASS_NAME.equals(valueClassName)) {
+                    return RecordFieldType.DATE;
+                }
+                if (FLOAT_CLASS_NAME.equals(valueClassName)) {
+                    return RecordFieldType.FLOAT;
+                }
+                if (DOUBLE_CLASS_NAME.equals(valueClassName)) {
+                    return RecordFieldType.DOUBLE;
+                }
+                if (BIGDECIMAL_CLASS_NAME.equals(valueClassName)) {
+                    return RecordFieldType.DECIMAL;
+                }
+
                 return RecordFieldType.RECORD;
             case Types.TIME:
             case Types.TIME_WITH_TIMEZONE:

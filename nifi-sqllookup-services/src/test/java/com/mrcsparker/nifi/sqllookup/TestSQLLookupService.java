@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.mrcsparker.nifi.sqllookup;
 
 import org.apache.nifi.dbcp.DBCPService;
@@ -53,7 +54,8 @@ public class TestSQLLookupService extends AbstractSQLLookupServiceTest {
         sqlLookupService = new SQLLookupService();
         runner.addControllerService("SQLRecordLookupService", sqlLookupService);
         runner.setProperty(sqlLookupService, SQLLookupService.CONNECTION_POOL, "dbcpService");
-        runner.setProperty(sqlLookupService, SQLLookupService.SQL_QUERY, "SELECT * FROM TEST_LOOKUP_DB WHERE name = :name");
+        runner.setProperty(sqlLookupService, SQLLookupService.SQL_QUERY,
+                        "SELECT * FROM TEST_LOOKUP_DB WHERE name = :name");
         runner.setProperty(sqlLookupService, SQLLookupService.LOOKUP_VALUE_COLUMN, "VALUE");
         runner.enableControllerService(dbcpService);
         runner.enableControllerService(sqlLookupService);
@@ -104,7 +106,8 @@ public class TestSQLLookupService extends AbstractSQLLookupServiceTest {
     @Test
     public void testMultiValueLookup0() throws Exception {
         runner.disableControllerService(sqlLookupService);
-        runner.setProperty(sqlLookupService, SQLLookupService.SQL_QUERY, "SELECT * FROM TEST_LOOKUP_DB WHERE name = :name AND address = :address");
+        runner.setProperty(sqlLookupService, SQLLookupService.SQL_QUERY,
+                        "SELECT * FROM TEST_LOOKUP_DB WHERE name = :name AND address = :address");
         runner.assertValid(sqlLookupService);
         runner.enableControllerService(sqlLookupService);
 

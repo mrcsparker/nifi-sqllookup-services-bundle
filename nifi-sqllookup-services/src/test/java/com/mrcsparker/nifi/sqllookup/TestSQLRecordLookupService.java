@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.mrcsparker.nifi.sqllookup;
 
 import org.apache.nifi.dbcp.DBCPService;
@@ -52,7 +53,8 @@ public class TestSQLRecordLookupService extends AbstractSQLLookupServiceTest {
         sqlRecordLookupService = new SQLRecordLookupService();
         runner.addControllerService("SQLRecordLookupService", sqlRecordLookupService);
         runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.CONNECTION_POOL, "dbcpService");
-        runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.SQL_QUERY, "SELECT * FROM TEST_LOOKUP_DB WHERE name = :name");
+        runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.SQL_QUERY,
+                        "SELECT * FROM TEST_LOOKUP_DB WHERE name = :name");
         runner.enableControllerService(dbcpService);
         runner.enableControllerService(sqlRecordLookupService);
 
@@ -77,21 +79,24 @@ public class TestSQLRecordLookupService extends AbstractSQLLookupServiceTest {
 
     @Test
     public void testSimpleLookup0() throws Exception {
-        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("name", "547897511298456"));
+        final Optional<Record> get1 = sqlRecordLookupService
+                        .lookup(Collections.singletonMap("name", "547897511298456"));
         assertTrue(get1.isPresent());
         assertEquals("Consider the Lilies", get1.get().getAsString("VALUE"));
     }
 
     @Test
     public void testSimpleLookup1() throws Exception {
-        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("name", "867142279069316"));
+        final Optional<Record> get1 = sqlRecordLookupService
+                        .lookup(Collections.singletonMap("name", "867142279069316"));
         assertTrue(get1.isPresent());
         assertEquals("The Needles Eye", get1.get().getAsString("VALUE"));
     }
 
     @Test
     public void testSimpleLookup2() throws Exception {
-        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("name", "443771414357476"));
+        final Optional<Record> get1 = sqlRecordLookupService
+                        .lookup(Collections.singletonMap("name", "443771414357476"));
         assertTrue(get1.isPresent());
         assertEquals("Françoise Sagan", get1.get().getAsString("VALUE"));
     }
@@ -110,7 +115,8 @@ public class TestSQLRecordLookupService extends AbstractSQLLookupServiceTest {
 
     @Test
     public void testRecordLookup() throws Exception {
-        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("name", "443771414357476"));
+        final Optional<Record> get1 = sqlRecordLookupService
+                        .lookup(Collections.singletonMap("name", "443771414357476"));
         assertTrue(get1.isPresent());
         assertEquals("443771414357476", get1.get().getAsString("NAME"));
         assertEquals("Françoise Sagan", get1.get().getAsString("VALUE"));
@@ -123,18 +129,16 @@ public class TestSQLRecordLookupService extends AbstractSQLLookupServiceTest {
     public void testArrayLookup() throws Exception {
         runner.disableControllerService(sqlRecordLookupService);
         runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.USE_JDBC_TYPES, "true");
-        runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.SQL_QUERY, "SELECT array_agg(VALUE ORDER BY NAME DESC) AS LOTSA FROM TEST_LOOKUP_DB WHERE NAME IN(:name)");
+        runner.setProperty(sqlRecordLookupService, SQLRecordLookupService.SQL_QUERY,
+                        "SELECT array_agg(VALUE ORDER BY NAME DESC) AS LOTSA FROM TEST_LOOKUP_DB WHERE NAME IN(:name)");
         runner.assertValid(sqlRecordLookupService);
         runner.enableControllerService(sqlRecordLookupService);
 
         Map<String, Object> criteria = new HashMap<>();
-        criteria.put("name", Arrays.asList(
-                "990192861112958",
-                "012470853914233",
-                "912066265194017"
-        ));
-        String[] stringArray = {"Cabbages and Kings", "A Handful of Dust", "In Death Ground"};
-        Object[] resultArray = DataTypeUtils.convertRecordArrayToJavaArray(stringArray, RecordFieldType.STRING.getDataType());
+        criteria.put("name", Arrays.asList("990192861112958", "012470853914233", "912066265194017"));
+        String[] stringArray = { "Cabbages and Kings", "A Handful of Dust", "In Death Ground" };
+        Object[] resultArray = DataTypeUtils
+                        .convertRecordArrayToJavaArray(stringArray, RecordFieldType.STRING.getDataType());
 
         final Optional<Record> get1 = sqlRecordLookupService.lookup(criteria);
         assertTrue(get1.isPresent());
@@ -145,11 +149,13 @@ public class TestSQLRecordLookupService extends AbstractSQLLookupServiceTest {
     @Test
     public void testExpressionLanguage() throws Exception {
         runner.disableControllerService(sqlRecordLookupService);
-        runner.setProperty(sqlRecordLookupService, SQLLookupService.SQL_QUERY, "${literal(\"SELECT * FROM TEST_LOOKUP_DB WHERE name = \"):append(\":name\"):append(\";\")}");
+        runner.setProperty(sqlRecordLookupService, SQLLookupService.SQL_QUERY,
+                        "${literal(\"SELECT * FROM TEST_LOOKUP_DB WHERE name = \"):append(\":name\"):append(\";\")}");
         runner.assertValid(sqlRecordLookupService);
         runner.enableControllerService(sqlRecordLookupService);
 
-        final Optional<Record> get1 = sqlRecordLookupService.lookup(Collections.singletonMap("name", "443771414357476"));
+        final Optional<Record> get1 = sqlRecordLookupService
+                        .lookup(Collections.singletonMap("name", "443771414357476"));
         assertTrue(get1.isPresent());
         assertEquals("443771414357476", get1.get().getAsString("NAME"));
         assertEquals("Françoise Sagan", get1.get().getAsString("VALUE"));

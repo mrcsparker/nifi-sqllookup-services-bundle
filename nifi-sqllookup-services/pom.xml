@@ -13,14 +13,14 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>com.mrcsparker</groupId>
         <artifactId>nifi-sqllookup-services-bundle</artifactId>
-        <version>1.10.0</version>
+        <version>1.12.0</version>
     </parent>
 
     <artifactId>nifi-sqllookup-services</artifactId>
@@ -72,6 +72,11 @@
             <artifactId>cache2k-base-bom</artifactId>
             <version>${cache2k.version}</version>
             <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
