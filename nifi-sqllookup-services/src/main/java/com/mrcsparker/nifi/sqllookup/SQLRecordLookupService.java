@@ -17,8 +17,8 @@
 
 package com.mrcsparker.nifi.sqllookup;
 
-import com.mrcsparker.nifi.sqllookup.cache.Cache2kAdapter;
 import com.mrcsparker.nifi.sqllookup.cache.CaffeineAdapter;
+import com.mrcsparker.nifi.sqllookup.cache.GuavaAdapter;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.nifi.annotation.documentation.CapabilityDescription;
 import org.apache.nifi.annotation.documentation.Tags;
@@ -156,7 +156,7 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
 
             try (ResultSet resultSet = preparedStatement.getResultSet()) {
                 final RecordSchema schema = new SimpleRecordSchema(new ArrayList<>());
-                try (SQLResultSetRecordSet resultSetRecordSet = new SQLResultSetRecordSet(resultSet, schema)) {
+                try (ResultSetRecordSet resultSetRecordSet = new ResultSetRecordSet(resultSet, schema)) {
                     return Optional.of(resultSetRecordSet.next());
                 }
             }
@@ -191,12 +191,12 @@ public class SQLRecordLookupService extends AbstractSQLLookupService<Record> {
     @OnEnabled
     public void onEnabled(final ConfigurationContext context) {
         setDefaultValues(context);
-        this.useJDBCTypes = context.getProperty(USE_JDBC_TYPES).asBoolean();
+        useJDBCTypes = context.getProperty(USE_JDBC_TYPES).asBoolean();
 
-        if (cachingLibrary.equals("Caffeine")) {
+        if ("Caffeine".equals(cachingLibrary)) {
             cache = new CaffeineAdapter<>(cacheSize);
         } else {
-            cache = new Cache2kAdapter<>(cacheSize, Record.class);
+            cache = new GuavaAdapter<>(cacheSize);
         }
     }
 }
