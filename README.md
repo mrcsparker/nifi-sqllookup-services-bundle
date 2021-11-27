@@ -38,8 +38,8 @@ These controllers were designed to be _flexible_ and _fast_.
 ```bash
 > cd nifi-sqllookup-bundle
 > mvn package
-> cp ./nifi-sqllookup-services-nar/target/nifi-sqllookup-services-nar-1.12.0.nar /NIFI_INSTALL/lib/
-> cp ./nifi-sqllookup-services-api-nar/target/nifi-sqllookup-services-api-nar-1.12.0.nar /NIFI_INSTALL/lib/
+> cp ./nifi-sqllookup-services-nar/target/nifi-sqllookup-services-nar-1.15.0.nar /NIFI_INSTALL/lib/
+> cp ./nifi-sqllookup-services-api-nar/target/nifi-sqllookup-services-api-nar-1.15.0.nar /NIFI_INSTALL/lib/
 ```
 
 - Start NiFi

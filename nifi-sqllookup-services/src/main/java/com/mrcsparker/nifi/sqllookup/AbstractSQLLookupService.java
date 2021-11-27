@@ -36,7 +36,7 @@ abstract class AbstractSQLLookupService<T> extends AbstractControllerService imp
                                     .description("SQL Query")
                                     .required(true)
                                     .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
-                                    .expressionLanguageSupported(ExpressionLanguageScope.FLOWFILE_ATTRIBUTES)
+                                    .expressionLanguageSupported(ExpressionLanguageScope.VARIABLE_REGISTRY)
                                     .build();
 
     static final PropertyDescriptor QUERY_TIMEOUT =

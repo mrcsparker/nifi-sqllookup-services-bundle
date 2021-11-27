@@ -128,14 +128,18 @@ public class SQLLookupService extends AbstractSQLLookupService<String> {
     @OnEnabled
     public void onEnabled(final ConfigurationContext context) throws InitializationException {
         setDefaultValues(context);
-        this.lookupValue = context.getProperty(LOOKUP_VALUE_COLUMN).getValue();
+        lookupValue = context.getProperty(LOOKUP_VALUE_COLUMN).getValue();
 
-        if (cachingLibrary.equals("Caffeine")) {
-            cache = new CaffeineAdapter<>(cacheSize);
-        } else if (cachingLibrary.equals("Cache2k")) {
-            cache = new Cache2kAdapter<>(cacheSize, String.class);
-        } else {
-            cache = new GuavaAdapter<>(cacheSize);
+        switch (cachingLibrary) {
+            case "Caffeine":
+                cache = new CaffeineAdapter<>(cacheSize);
+                break;
+            case "Cache2k":
+                cache = new Cache2kAdapter<>(cacheSize, String.class);
+                break;
+            default:
+                cache = new GuavaAdapter<>(cacheSize);
+                break;
         }
     }
 
